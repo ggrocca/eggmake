@@ -1,0 +1,138 @@
+* Ongoing Tasks
+
+- eliminate CSOURCES and CPPSOURCES: use only SOURCES and automagically separate c++ and c objects and deps.
+
+- use strip to get rid of whitespace before issuing compilation commands
+
+- automatically disable builtin rules, but offer an option for using them
+
+- multitarget.mk should work by including and not by calling make
+
+** Create proper examples
+   - every feature should have a small working fake project as an example, from the smallest/simplest single executable project to more complex examples. One for C and one for C++.
+   - There should a reference Makefile containing all possible variables and uses, commented out.
+*** vpath
+    show usage of vpath for adding directories.
+*** flags
+    complete the flags example with all possibile flags.
+
+** default values
+- should force/search sane defaults values for variable not defined (compiler, etc)
+- for example, NO_DIRECTORY_PRINT in multitarget should default to true.
+
+** write the smallest possible, check that it works.
+TARGET := target
+CSOURCES := target_main.c
+include ../../eggmakelib/engine.mk
+and add it as code at the beginning of README.md
+
+- with sane defaults and support for adding all files in a directory, and SOURCES defaulting to all C/C++ files in the same dir as the makefile, the smallest makefile should build target from SOURCES
+
+** debugging features
+- should add variables for debugging the makefile itself and/or making it verbose - if set, warning directives are printed out with target names, object names etc etc
+
+** Support adding files by directories
+   all C/C++ files in the directory will be added as sources, c files as C sources and C++ files as C++ sources
+
+** Support multiple C++ extensions
+   A project that has .cpp, .cc .cxx files all together should work without problems. How do I do that without doing copy/paste of the compilation code? .cc/.hh .cpp/.hpp .C/.H .c++/.h++ .cxx/.hxx
+
+** more flexible handling of automatic dependencies generation
+   - should add variable to suppress generation of dependencies
+   - should add customizable command for dependecies generation
+
+
+** Create a sysutil.mk library
+*** write simple functions for if checking
+    - check if variable equal a string
+    - check if variable equals one in a list of strings
+*** Set standard variables for conditional building
+    - hostname
+    - os family/type/version/kernel etc etc
+    - username
+*** Macosx
+    uname -s
+    uname -m / -p / -r
+    sw_vers | grep ProductVersion | cut -f 2
+*** Windows
+    [[http://stackoverflow.com/questions/714100/os-detecting-makefile][detect win vs different linux/mac/unixes]]
+    [[https://blogs.msdn.microsoft.com/david.wang/2006/03/27/howto-detect-process-bitness/][detecting architecture on windows]]
+    [[http://www.bezem.de/make/CreatingAMakeTemplate.pdf][A pdf that may have suggestion for using CMD.EXE and CL.EXE in a vanilla windows environment]]
+*** Linux/Unix
+    [[http://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux/27776822#27776822][uname table for linux/unix]]
+    [[https://www.freedesktop.org/software/systemd/man/os-release.html][documentation on linux /etc/os-release]]
+    [[http://linuxmafia.com/faq/Admin/release-files.html][table for other unixes release files]]
+
+
+** Add support for creating different directories for different compilation targets instead of cleaning everything.
+   - For example, build.release and build.debug (or build.program.debug etctc)
+   - Option for choosing between: "only the executable of the last build is left in the root directory (build dirs act as object caches)" vs "the executable is in the build dir". Another possibility: a certain target activates the option "copy executable to root", all other executables stay in the build directory.
+   - Optionally, should certain targets be compiled together when doing make all? For example release and debug? Done this way, release should be added as an explicit target type and the only default target for "all".
+
+** Add support for custom compilation targets, eg for additional cross compilation builds
+   - depending on how it's done, should this feature replace the all/debug/..../statictracedebug system (which is ugly anyway)?
+   - users should be able to add custom targets of their choosing, which enable different build options. At the end of the makefile they write FINAL_FLAGS and FINAL_LDFLAGS according to the targets.
+   - Maybe using metaprogramming in multitarget.mk:
+     http://make.mad-scientist.net/secondary-expansion/
+   - and/or the foreach function, iterated over a list of possible targets - this would eliminate the copy-pasted code in multitarget.mk
+
+idea: there should be a stdtarget.mk makefile that implements the all/debug/.../statictracedebug system (and should add a release target for additional flags that go in release only?). users could import it or not, and they should have facilities for adding custom target names to the system, and make them work within all other features as they were native.
+
+
+** install.sh script
+   which exports the library files to a given location.
+   - -g,--global (default dir becomes /opt/local/share/, requires sudo)
+   - -d,--dir </custom/install/path/> , will append eggmakelib to it, (default dir=~/)
+   - -m if installing with -l, remember the directory in a database (./eggmake.local.track). If removing with -r, remove from db.
+   - -a perform action on everything on the db
+   - -i,--install
+   - -c check if version in dir and version in repo differs, and which one is newer.
+   - -r remove
+
+
+* Future Tasks
+
+** Support for library compilation
+   - What additional features are needed?
+   - dynamic and static libraries?
+   
+** Better separation between standard, environment and private names for targets and variable. distinguish:
+   - PUBLIC environment variables which should be set by the user on the command line (optionally read them, do not set them)
+   - PROTECTED variables set by makefiles describing the project, and read by the library engine.mk;
+   - PRIVATE variables used internally by engine.mk
+   - think about separation between standard and custom targets:
+   http://www.gnu.org/software/make/manual/html_node/Standard-Targets.html
+
+** Consider support for multiple executables that share a single build directory structure
+   - This would be useful for compiling executables that depend over almost the same set of object files and are often recompiled together. Object files would be copmiled once.
+   - Problem: if one executable is recompiled with a different compile option, the other build becomes broken, with the executable and part of the object files still being compiled with the old option. Make now sees an inconsistent state.
+   - Solution: executables sharing a build directory with others should always be recompiled together...
+   - Maybe it's impossible to support multiple executables in the same makefile - maybe it is, if all multiple targets depend on all object files. This would make sure that every object file is recompiled if the options change.
+   - if it's done that way, maybe an option could be added for sharing the build directory for all builds, when compiling releases for installation (no develop mode).
+
+** Consider support for global compilation
+- That is, checking subdirectories and compiling every target that is found inside them. A single make in the project root directory should then recompile everything in the project.
+
+- How does this interact with the option for sharing executables? Really, two use cases: development phase, everything is private. Release, everything is shared.
+
+- This could work at directory level, by using a build dir relative to the directory of the launched makefile. In this way, the root dir can be configured for an object-sharing, global build, and subdirs can make development monad-style builds. Problem: does the build dir have a flat structure? With all object files and executables in the same level? Maybe yes!
+
+- test this by compiling all examples all at once in the example directory.
+
+** General aims for makefile calling makefiles:
+- include, not recurse
+- any single executable should be able to be recompiled by going in the right directory and typing make executable <optional modifiers>
+- make inside a directory should recompile every executable in the working directory and subdirectories, and or clean/test everything.
+
+** Facilities for install and dist targets?
+   What are the proper actions and defaults here?
+
+** colored outputs for supported terminals
+   ideas: put dep compilation in grey, and make real compilation stand out.
+
+** Support an eggmake.conf.mk file
+   - Every makefile automatically search for a standard conf file in standard places (same dir, previous dirs until the project root dir, homedir, systemdir etc)
+   - The conf file personalizes the default variables that control eggmake.
+
+** Facilities for testing (unit testing etc)?
+
