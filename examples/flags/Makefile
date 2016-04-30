@@ -17,11 +17,11 @@ VPATH =
 
 
 ## Names of files to compile, without path.
-CSOURCES = main.c
+SOURCES = main.c
 
 ## Compile flags
-override FLAGS += -DFLAGS__
-override DEBUG_FLAGS += -DDEBUG_FLAGS__
+override FLAGS += -DFLAGS
+override DEBUG_FLAGS += -DDEBUG_FLAGS
 override TRACE_FLAGS +=
 override RELEASE_FLAGS +=
 override STATIC_FLAGS +=

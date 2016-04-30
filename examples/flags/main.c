@@ -1,13 +1,13 @@
 #include <stdio.h>
 
-#ifdef FLAGS__
-char* flags_str =  "FLAGS__";
+#ifdef FLAGS
+char* flags_str =  "FLAGS";
 #else
 char* flags_str =  "";
 #endif    
 
-#ifdef DEBUG_FLAGS__
-char* debug_flags_str =  "DEBUG_FLAGS__";
+#ifdef DEBUG_FLAGS
+char* debug_flags_str =  "DEBUG_FLAGS";
 #else
 char* debug_flags_str =  "";
 #endif    

@@ -56,23 +56,49 @@ override CXXDEFINES += $(DEFINES)
 
 
 ### Add automatically generated sources to the project sources
-override CPPSOURCES += $(AUTO_CPPSOURCES)
-override CSOURCES += $(AUTO_CSOURCES)
+override SOURCES += $(AUTO_SOURCES)
+# override CPPSOURCES += $(AUTO_CPPSOURCES)
+# override CSOURCES += $(AUTO_CSOURCES)
 
 
 ### Use C++ as a linker if there are C++ sources.
-ifeq ($(strip $(CPPSOURCES)),)
+# CXX_FILTER := $(addprefix "%.", $(CXX_EXTENSIONS)) 
+ifeq ($(strip $(filter %.cpp %.c++ %.cxx %.cc %.C, $(SOURCES)) ), )
 LD = $(CC)
 else
 LD = $(CXXC)
 endif
+# $(warning !!! LD)
+# $(warning $(LD))
 
 
 ### Set the list of modules to be compiled.
-override OBJECTS := $(CPPSOURCES:.$(CPP_EXT)=.$(OBJ_EXT))
-override DEPS := $(CPPSOURCES:.$(CPP_EXT)=.$(DEP_EXT))
-override OBJECTS += $(CSOURCES:.c=.o)
-override DEPS += $(CSOURCES:.c=.d)
+#ALL_EXTENSIONS := $(addprefix ".", $(CXX_EXTENSIONS)) .c
+#OBJECTS := $(foreach ext, $(ALL_EXTENSIONS),   )
+OBJECTS :=
+OBJECTS += $(patsubst %.cpp, %.opp, $(filter %.cpp, $(SOURCES)) )
+OBJECTS += $(patsubst %.c++, %.o++, $(filter %.c++, $(SOURCES)) )
+OBJECTS += $(patsubst %.cxx, %.oxx, $(filter %.cxx, $(SOURCES)) )
+OBJECTS += $(patsubst %.cc, %.oo, $(filter %.cc, $(SOURCES)) )
+OBJECTS += $(patsubst %.C, %.O, $(filter %.C, $(SOURCES)) )
+OBJECTS += $(patsubst %.c, %.o, $(filter %.c, $(SOURCES)) )
+DEPS := 
+DEPS += $(patsubst %.cpp, %.dpp, $(filter %.cpp, $(SOURCES)) )
+DEPS += $(patsubst %.c++, %.d++, $(filter %.c++, $(SOURCES)) )
+DEPS += $(patsubst %.cxx, %.dxx, $(filter %.cxx, $(SOURCES)) )
+DEPS += $(patsubst %.cc, %.dd, $(filter %.cc, $(SOURCES)) )
+DEPS += $(patsubst %.C, %.D, $(filter %.C, $(SOURCES)) )
+DEPS += $(patsubst %.c, %.d, $(filter %.c, $(SOURCES)) )
+# $(warning $(SOURCES))
+# $(warning !!! OBJECTS)
+# $(warning $(OBJECTS))
+# $(warning !!! DEPS)
+# $(warning $(DEPS))
+# # old version
+# override OBJECTS := $(CPPSOURCES:.$(CPP_EXT)=.$(OBJ_EXT))
+# override DEPS := $(CPPSOURCES:.$(CPP_EXT)=.$(DEP_EXT))
+# override OBJECTS += $(CSOURCES:.c=.o)
+# override DEPS += $(CSOURCES:.c=.d)
 
 
 
@@ -117,7 +143,7 @@ ifneq ($(NEWGOAL), $(OLDGOAL))
 
 #$(warning DELETE)
 #$(warning $(RM) $(BUILD_OBJECTS) $(BUILD_DEPS) $(TARGET))
-dummy := $(shell $(RM) $(BUILD_OBJECTS) $(BUILD_DEPS) $(TARGET) $(AUTO_CPPSOURCES) $(AUTO_CSOURCES) $(AUTO_HEADERS))
+dummy := $(shell $(RM) $(BUILD_OBJECTS) $(BUILD_DEPS) $(TARGET) $(AUTO_SOURCES) $(AUTO_HEADERS))
 
 endif
 endif
@@ -145,7 +171,7 @@ ifneq ($(NEW_TARGET_FORCEBUILD_FILE),)
 	-$(RM) $(NEW_TARGET_FORCEBUILD_FILE)
 endif
 # Warning, the following clean command is repeated in new_target_forcerebuild section.
-	-$(RM) $(BUILD_OBJECTS) $(BUILD_DEPS) $(TARGET) $(AUTO_CPPSOURCES) $(AUTO_CSOURCES) $(AUTO_HEADERS)
+	-$(RM) $(BUILD_OBJECTS) $(BUILD_DEPS) $(TARGET) $(AUTO_SOURCES) $(AUTO_HEADERS)
 ifneq ($(strip $(BUILD_DIR)),)
 	-$(RM) -r $(BUILD_DIR)
 endif
@@ -166,27 +192,71 @@ endif
 
 ### Program linking:
 $(TARGET) : $(BUILD_OBJECTS)
-	$(LD) $^ $(FRAMEWORKS) -o $@ $(FINAL_LDFLAGS)
+	$(strip $(LD) $^ $(FRAMEWORKS) -o $@ $(FINAL_LDFLAGS))
 
 
 ### Implicit rules for objects and dependencies, C language.
 $(BUILD_DIR_SLASH)%.o: %.c
-	$(CC) $(CDEFINES) $(CFLAGS) $(CINCLUDES) -c $< -o $@  
+	$(strip $(CC) $(CDEFINES) $(CFLAGS) $(CINCLUDES) -c $< -o $@)
 
 $(BUILD_DIR_SLASH)%.d: %.c
-	$(CC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.o -MT $@ $(CDEFINES) $(CFLAGS) $(CINCLUDES) $<
+	$(strip $(CC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.o -MT $@ $(CDEFINES) $(CFLAGS) $(CINCLUDES) $<)
 #	$(CC) -MM $(CDEFINES) $(CFLAGS) $(CINCLUDES) $< | sed 's/\($(subst /,\/,$*)\)\.o[ :]*/$(BUILD_DIR_SLASH_SED)\1.o $(subst /,\/,$@) : /g' > $@;
 
 
-
 ### Implicit rules for objects and dependencies, C++ language.
-$(BUILD_DIR_SLASH)%.$(OBJ_EXT): %.$(CPP_EXT)
-	$(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@  
+$(BUILD_DIR_SLASH)%.opp: %.cpp
+	$(strip $(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@)
+$(BUILD_DIR_SLASH)%.oxx: %.cxx
+	$(strip $(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@)
+$(BUILD_DIR_SLASH)%.o++: %.++
+	$(strip $(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@)
+$(BUILD_DIR_SLASH)%.oo: %.cc
+	$(strip $(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@)
+$(BUILD_DIR_SLASH)%.O: %.C
+	$(strip $(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@)
 
-$(BUILD_DIR_SLASH)%.$(DEP_EXT): %.$(CPP_EXT)
-	$(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.$(OBJ_EXT) -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<
-#	$(CXXC) -MM $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $< | sed 's/\($(subst /,\/,$*)\)\.o[ :]*/$(BUILD_DIR_SLASH_SED)\1.$(OBJ_EXT) $(subst /,\/,$@) : /g' > $@;
+$(BUILD_DIR_SLASH)%.$.dpp: %.cpp
+	$(strip $(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.opp -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<)
+$(BUILD_DIR_SLASH)%.$.dxx: %.cxx
+	$(strip $(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.oxx -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<)
+$(BUILD_DIR_SLASH)%.$.d++: %.c++
+	$(strip $(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.o++ -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<)
+$(BUILD_DIR_SLASH)%.$.dd: %.cc
+	$(strip $(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.oo -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<)
+$(BUILD_DIR_SLASH)%.$.D: %.C
+	$(strip $(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.O -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<)
 
+
+
+# ### Implicit rules for objects and dependencies, C++ language.
+# ### Foreach version, still broken
+# $(BUILD_DIR_SLASH)%.$(OBJ_EXT): %.$(CPP_EXT)
+# 	$(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@  
+
+# $(BUILD_DIR_SLASH)%.$(DEP_EXT): %.$(CPP_EXT)
+# 	$(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.$(OBJ_EXT) -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<
+# #	$(CXXC) -MM $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $< | sed 's/\($(subst /,\/,$*)\)\.o[ :]*/$(BUILD_DIR_SLASH_SED)\1.$(OBJ_EXT) $(subst /,\/,$@) : /g' > $@;
+
+
+# ### Implicit rules for objects and dependencies, C++ language.
+# ### Old version.
+# define CXXRULES
+
+# OBJ_EXT = $(subst c,o,$(1)) 
+# DEP_EXT = $(subst c,d,$(1)) 
+
+# $(BUILD_DIR_SLASH)%.$(OBJ_EXT): %.$(1)
+# 	$(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@  
+
+# $(BUILD_DIR_SLASH)%.$(DEP_EXT): %.$(1)
+# 	$(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.$(OBJ_EXT) -MT $@ 
+
+# endef
+
+# $(warning $(CXX_EXTENSIONS))
+# $(warning $(CXXRULES))
+# $(warning $(foreach ext, $(CXX_EXTENSIONS), $(eval $(call CXXRULES, $(ext))) ) )
 
 
 # ### debugging facilities

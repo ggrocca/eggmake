@@ -5,11 +5,8 @@ TARGET := example.out
 BUILD_DIR := build
 
 CXXC = g++
-CPP_EXT = cc
-DEP_EXT = dd
-OBJ_EXT = oo
 
-CPPSOURCES = main.cc
+SOURCES = main.cc
 
 
 #####################
@@ -48,8 +45,7 @@ NEW_TARGET_FORCEBUILD_FILE := $(BUILD_DIR)/.make_previous_goal
 ### Automatic code generation
 
 ## C/C++ automatically generated source and header files.
-AUTO_CPPSOURCES := azang.tab.cc
-AUTO_CSOURCES := 
+AUTO_SOURCES := azang.tab.cc
 AUTO_HEADERS := azang.tab.hh zving.auto.hh
 
 # $@ : matching target

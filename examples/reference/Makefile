@@ -25,30 +25,18 @@ VPATH =
 # BASELIBS_DIR = ../../external/libs/dir
 BASELIBS_DIR =
 
-## C, CXX compiler
-# CXXC = g++
-# CC = gcc
+## select the C and C++ compilers
+# CXXC =
+# CC =
 CXXC = g++
 CC = gcc
 
-## file extensions for C++ files, their objects and dependencies (e.g:
-## .cpp/.dpp/.opp, or .cc/.dd/.oo or whatever you like; remember that
-## .c, .d and .o are always used for C files).
-# CPP_EXT = cc
-# DEP_EXT = dd
-# OBJ_EXT = oo
-CPP_EXT = cc
-DEP_EXT = dd
-OBJ_EXT = oo
 
-## Names of files to compile, without path. add C++ sources and C
-## sources to the right variable. Warning: you cannot have files with
-## the same names in different directories, because the names of
-## object files will conflict.
-# CPPSOURCES = file1.cc file2.cc
-# CSOURCES = file1.c file2.c
-CPPSOURCES = 
-CSOURCES = main.c
+## Names of files to compile, without path. Warning: you cannot have
+## files with the same names in different directories, because the
+## names of object files will conflict.
+# SOURCES = file1.c file2.cc file3.cpp
+SOURCES = main.c
 
 
 #####################
@@ -189,11 +177,9 @@ NEW_TARGET_FORCEBUILD_FILE := $(BUILD_DIR)/.make_previous_goal
 ### Automatic code generation
 
 # # C/C++ automatically generated source and header files.
-# AUTO_CPPSOURCES := 
-# AUTO_CSOURCES := 
+# AUTO_SOURCES := 
 # AUTO_HEADERS := 
-AUTO_CPPSOURCES := 
-AUTO_CSOURCES := 
+AUTO_SOURCES := 
 AUTO_HEADERS := 
 
 # # Custom rules for code generation
