@@ -3,4 +3,6 @@
 int main (void)
 {
     print_second ();
+
+    return 0;
 }

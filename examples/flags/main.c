@@ -1,23 +1,34 @@
 #include <stdio.h>
 
-#ifdef FLAGS
-char* flags_str =  "FLAGS";
-#else
-char* flags_str =  "";
-#endif    
-
-#ifdef DEBUG_FLAGS
-char* debug_flags_str =  "DEBUG_FLAGS";
-#else
-char* debug_flags_str =  "";
-#endif    
-
-void print_flags ()
-{
-    printf ("flags: %s -- debug_flags: %s\n", flags_str, debug_flags_str);
-}
-
 int main (void)
 {
-    print_flags ();
+#ifdef COMMON
+    printf ("COMMON\n");
+#endif
+
+#ifdef RELEASE
+    printf ("RELEASE\n");
+#endif
+
+#ifdef DEBUG
+    printf ("DEBUG\n");
+#endif
+
+#ifdef VERBOSE_TRACE
+    printf ("VERBOSE_TRACE\n");
+#endif
+
+#ifdef STATIC
+    printf ("STATIC\n");
+#endif
+
+#ifdef PLAIN_C
+    printf ("PLAIN_C\n");
+#endif
+
+#ifdef CPLUSPLUS
+    printf ("CPLUSPLUS\n");
+#endif
+
+    return 0;
 }

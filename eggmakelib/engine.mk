@@ -6,144 +6,156 @@
 ###\\\   -- -- -- -- -- ------- -- -- -- -- --   ///###
 
 
-### Non-file phony targets
-.PHONY : all clean debug trace debugtrace static staticdebug statictrace staticdebugtrace
+### Include default values
+egglib_SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+include $(egglib_SELF_DIR)defaults.mk
 
+### Set all directories that may contain the source files.
+VPATH = $(egg_SOURCE_PATH)
+
+### Non-file phony targets
+.PHONY : all clean release debug trace static tracerelease tracedebug staticrelease staticdebug statictrace statictracerelease statictracedebug
+
+
+
+### Initialize flags
+egglib_FINAL_FLAGS = $(CPPFLAGS) $(egg_FLAGS)
 
 ### Use release flags for `make', debug flags for `make debug' and
 ### tracing flags for "make trace".
-all: override FLAGS += $(RELEASE_FLAGS)
-debug: override FLAGS += $(DEBUG_FLAGS)
-trace: override FLAGS += $(TRACE_FLAGS)
-debugtrace: override FLAGS += $(DEBUG_FLAGS) $(TRACE_FLAGS)
-static: override FLAGS += $(RELEASE_FLAGS) $(STATIC_FLAGS)
-staticdebug: override FLAGS+= $(DEBUG_FLAGS) $(STATIC_FLAGS)
-statictrace: override FLAGS+= $(TRACE_FLAGS) $(STATIC_FLAGS)
-staticdebugtrace: override FLAGS+= $(DEBUG_FLAGS) $(TRACE_FLAGS) $(STATIC_FLAGS)
+release: egglib_FINAL_FLAGS += $(egg_RELEASE_FLAGS)
+debug: egglib_FINAL_FLAGS += $(egg_DEBUG_FLAGS)
+trace: egglib_FINAL_FLAGS += $(egg_TRACE_FLAGS)
+static: egglib_FINAL_FLAGS += $(egg_STATIC_FLAGS)
 
-FINAL_LDFLAGS =
-all: override FINAL_LDFLAGS += $(LDFLAGS)
-debug: override FINAL_LDFLAGS += $(LDFLAGS)
-trace: override FINAL_LDFLAGS += $(LDFLAGS)
-debugtrace: override FINAL_LDFLAGS += $(LDFLAGS)
-static: override FINAL_LDFLAGS += $(STATIC_LDFLAGS)
-staticdebug: override FINAL_LDFLAGS += $(STATIC_LDFLAGS)
-statictrace: override FINAL_LDFLAGS += $(STATIC_LDFLAGS)
-staticdebugtrace: override FINAL_LDFLAGS += $(STATIC_LDFLAGS)
+tracerelease: egglib_FINAL_FLAGS += $(egg_TRACE_FLAGS) $(egg_RELEASE_FLAGS)
+tracedebug: egglib_FINAL_FLAGS += $(egg_TRACE_FLAGS) $(egg_DEBUG_FLAGS)
 
+staticdebug: egglib_FINAL_FLAGS += $(egg_STATIC_FLAGS) $(egg_DEBUG_FLAGS)
+staticrelease: egglib_FINAL_FLAGS += $(egg_STATIC_FLAGS) $(egg_RELEASE_FLAGS)
+statictrace: egglib_FINAL_FLAGS += $(egg_STATIC_FLAGS) $(egg_TRACE_FLAGS)
+statictracerelease: egglib_FINAL_FLAGS += $(egg_STATIC_FLAGS) $(egg_TRACE_FLAGS) $(egg_RELEASE_FLAGS)
+statictracedebug: egglib_FINAL_FLAGS += $(egg_STATIC_FLAGS) $(egg_TRACE_FLAGS) $(egg_DEBUG_FLAGS)
 
-### Add custom headers defines, if any.
-## Warning: a deprecated feature that is not particularly
-## useful. Instead of doing this, just add -DMY_HEADER_IS_PRESENT to
-## compiler directives conditionally on the environment
-## (user/hostname/os, whatever), and do things in code depending on
-## the given define (even including an untracked file).
-lc = $(subst A,a,$(subst B,b,$(subst C,c,$(subst D,d,$(subst E,e,$(subst F,f,$(subst G,g,$(subst H,h,$(subst I,i,$(subst J,j,$(subst K,k,$(subst L,l,$(subst M,m,$(subst N,n,$(subst O,o,$(subst P,p,$(subst Q,q,$(subst R,r,$(subst S,s,$(subst T,t,$(subst U,u,$(subst V,v,$(subst W,w,$(subst X,x,$(subst Y,y,$(subst Z,z,$1))))))))))))))))))))))))))
-uc = $(subst a,A,$(subst b,B,$(subst c,C,$(subst d,D,$(subst e,E,$(subst f,F,$(subst g,G,$(subst h,H,$(subst i,I,$(subst j,J,$(subst k,K,$(subst l,L,$(subst m,M,$(subst n,N,$(subst o,O,$(subst p,P,$(subst q,Q,$(subst r,R,$(subst s,S,$(subst t,T,$(subst u,U,$(subst v,V,$(subst w,W,$(subst x,X,$(subst y,Y,$(subst z,Z,$1))))))))))))))))))))))))))
+### Add specific language flags to general ones.
+egglib_FINAL_CFLAGS = $(CFLAGS) $(egg_CFLAGS) $(egglib_FINAL_FLAGS)
+egglib_FINAL_CXXFLAGS = $(CXXFLAGS) $(egg_CXXFLAGS) $(egglib_FINAL_FLAGS)
 
-ifneq ($(strip $(CUSTOM_HEADERS)),)
-override FLAGS += $(addsuffix _DEFINE, $(addprefix -DEGGMAKE_, $(call uc, $(basename $(notdir $(CUSTOM_HEADERS))))))
+### Initialize linker flags
+egglib_FINAL_LDFLAGS = $(LDFLAGS)
+egglib_FINAL_LDLIBS = $(LDLIBS)
+
+### dynamic
+release: egglib_FINAL_LDFLAGS += $(egg_LDFLAGS)
+release: egglib_FINAL_LDLIBS += $(egg_LDLIBS)
+debug: egglib_FINAL_LDFLAGS += $(egg_LDFLAGS)
+debug: egglib_FINAL_LDLIBS += $(egg_LDLIBS)
+trace: egglib_FINAL_LDFLAGS += $(egg_LDFLAGS)
+trace: egglib_FINAL_LDLIBS += $(egg_LDLIBS)
+tracerelease: egglib_FINAL_LDFLAGS += $(egg_LDFLAGS)
+tracerelease: egglib_FINAL_LDLIBS += $(egg_LDLIBS)
+tracedebug: egglib_FINAL_LDFLAGS += $(egg_LDFLAGS)
+tracedebug: egglib_FINAL_LDLIBS += $(egg_LDLIBS)
+
+### static
+static: egglib_FINAL_LDFLAGS += $(egg_STATIC_LDFLAGS)
+static: egglib_FINAL_LDLIBS += $(egg_STATIC_LDLIBS)
+staticrelease: egglib_FINAL_LDFLAGS += $(egg_STATIC_LDFLAGS)
+staticrelease: egglib_FINAL_LDLIBS += $(egg_STATIC_LDLIBS)
+staticdebug: egglib_FINAL_LDFLAGS += $(egg_STATIC_LDFLAGS)
+staticdebug: egglib_FINAL_LDLIBS += $(egg_STATIC_LDLIBS)
+statictrace: egglib_FINAL_LDFLAGS += $(egg_STATIC_LDFLAGS)
+statictrace: egglib_FINAL_LDLIBS += $(egg_STATIC_LDLIBS)
+statictracerelease: egglib_FINAL_LDFLAGS += $(egg_STATIC_LDFLAGS)
+statictracerelease: egglib_FINAL_LDLIBS += $(egg_STATIC_LDLIBS)
+statictracedebug: egglib_FINAL_LDFLAGS += $(egg_STATIC_LDFLAGS)
+statictracedebug: egglib_FINAL_LDLIBS += $(egg_STATIC_LDLIBS)
+
+### Use C++ as a linker if there are C++ sources.
+ifeq ($(strip $(filter %.cpp %.c++ %.cxx %.cc %.C, $(egg_SOURCES)) ), )
+egglib_LD = $(CC) $(egglib_FINAL_CFLAGS)
+else
+egglib_LD = $(CXX) $(egglib_FINAL_CXXFLAGS)
 endif
 
 
-### Add specific language flags to general ones.
-override CFLAGS += $(FLAGS)
-override CINCLUDES += $(INCLUDES)
-override CDEFINES += $(DEFINES)
-override CXXFLAGS += $(FLAGS)
-override CXXINCLUDES += $(INCLUDES)
-override CXXDEFINES += $(DEFINES)
+### Standard goals supported by eggmake:
+all : $(egg_TARGET)
+release : $(egg_TARGET)
+debug : $(egg_TARGET)
+trace : $(egg_TARGET)
+static : $(egg_TARGET)
+tracerelease : $(egg_TARGET)
+tracedebug : $(egg_TARGET)
+staticrelease : $(egg_TARGET)
+staticdebug : $(egg_TARGET)
+statictrace : $(egg_TARGET)
+statictracerelease : $(egg_TARGET)
+statictracedebug : $(egg_TARGET)
 
 
 ### Add automatically generated sources to the project sources
-override SOURCES += $(AUTO_SOURCES)
-# override CPPSOURCES += $(AUTO_CPPSOURCES)
-# override CSOURCES += $(AUTO_CSOURCES)
-
-
-### Use C++ as a linker if there are C++ sources.
-# CXX_FILTER := $(addprefix "%.", $(CXX_EXTENSIONS)) 
-ifeq ($(strip $(filter %.cpp %.c++ %.cxx %.cc %.C, $(SOURCES)) ), )
-LD = $(CC)
-else
-LD = $(CXXC)
-endif
-# $(warning !!! LD)
-# $(warning $(LD))
-
+egg_SOURCES += $(egg_AUTO_SOURCES)
 
 ### Set the list of modules to be compiled.
 #ALL_EXTENSIONS := $(addprefix ".", $(CXX_EXTENSIONS)) .c
 #OBJECTS := $(foreach ext, $(ALL_EXTENSIONS),   )
-OBJECTS :=
-OBJECTS += $(patsubst %.cpp, %.opp, $(filter %.cpp, $(SOURCES)) )
-OBJECTS += $(patsubst %.c++, %.o++, $(filter %.c++, $(SOURCES)) )
-OBJECTS += $(patsubst %.cxx, %.oxx, $(filter %.cxx, $(SOURCES)) )
-OBJECTS += $(patsubst %.cc, %.oo, $(filter %.cc, $(SOURCES)) )
-OBJECTS += $(patsubst %.C, %.O, $(filter %.C, $(SOURCES)) )
-OBJECTS += $(patsubst %.c, %.o, $(filter %.c, $(SOURCES)) )
-DEPS := 
-DEPS += $(patsubst %.cpp, %.dpp, $(filter %.cpp, $(SOURCES)) )
-DEPS += $(patsubst %.c++, %.d++, $(filter %.c++, $(SOURCES)) )
-DEPS += $(patsubst %.cxx, %.dxx, $(filter %.cxx, $(SOURCES)) )
-DEPS += $(patsubst %.cc, %.dd, $(filter %.cc, $(SOURCES)) )
-DEPS += $(patsubst %.C, %.D, $(filter %.C, $(SOURCES)) )
-DEPS += $(patsubst %.c, %.d, $(filter %.c, $(SOURCES)) )
-# $(warning $(SOURCES))
-# $(warning !!! OBJECTS)
-# $(warning $(OBJECTS))
-# $(warning !!! DEPS)
-# $(warning $(DEPS))
-# # old version
-# override OBJECTS := $(CPPSOURCES:.$(CPP_EXT)=.$(OBJ_EXT))
-# override DEPS := $(CPPSOURCES:.$(CPP_EXT)=.$(DEP_EXT))
-# override OBJECTS += $(CSOURCES:.c=.o)
-# override DEPS += $(CSOURCES:.c=.d)
+egglib_OBJECTS :=
+egglib_OBJECTS += $(patsubst %.cpp, %.opp, $(filter %.cpp, $(egg_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.c++, %.o++, $(filter %.c++, $(egg_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.cxx, %.oxx, $(filter %.cxx, $(egg_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.cc, %.oo, $(filter %.cc, $(egg_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.C, %.O, $(filter %.C, $(egg_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.c, %.o, $(filter %.c, $(egg_SOURCES)) )
+egglib_DEPS := 
+egglib_DEPS += $(patsubst %.cpp, %.dpp, $(filter %.cpp, $(egg_SOURCES)) )
+egglib_DEPS += $(patsubst %.c++, %.d++, $(filter %.c++, $(egg_SOURCES)) )
+egglib_DEPS += $(patsubst %.cxx, %.dxx, $(filter %.cxx, $(egg_SOURCES)) )
+egglib_DEPS += $(patsubst %.cc, %.dd, $(filter %.cc, $(egg_SOURCES)) )
+egglib_DEPS += $(patsubst %.C, %.D, $(filter %.C, $(egg_SOURCES)) )
+egglib_DEPS += $(patsubst %.c, %.d, $(filter %.c, $(egg_SOURCES)) )
 
 
 
 ### Build directory management.
 
 # if build dir is non-empty:
-ifneq ($(strip $(BUILD_DIR)),)
-# add trailing slash and escaped trailing slash.
-BUILD_DIR_SLASH = $(BUILD_DIR)/
-#BUILD_DIR_SLASH_SED = $(BUILD_DIR)\/
-# create it if not existent.
+ifneq ($(strip $(egg_BUILD_DIR)),)
+egglib_BUILD_DIR_SLASH := $(egg_BUILD_DIR)/
 ifneq ($(MAKECMDGOALS),clean)
-$(shell if [ ! -d $(BUILD_DIR) ]; then mkdir $(BUILD_DIR); fi)
+$(shell if [ ! -d $(egg_BUILD_DIR) ]; then mkdir $(egg_BUILD_DIR); fi)
 endif
 endif
 # prepend its name to targets.
-override BUILD_DEPS := $(addprefix $(BUILD_DIR_SLASH), $(DEPS))
-override BUILD_OBJECTS := $(addprefix $(BUILD_DIR_SLASH), $(OBJECTS))
+override egglib_BUILD_DEPS := $(addprefix $(egglib_BUILD_DIR_SLASH), $(egglib_DEPS))
+override egglib_BUILD_OBJECTS := $(addprefix $(egglib_BUILD_DIR_SLASH), $(egglib_OBJECTS))
 
 
 
 ### Rebuild everything from scratch if current make command is
 ### different from the previous one.
 
-ifeq ($(NEW_TARGET_FORCEBUILD), true)
-#$(warning NEW_TARGET_FORCEBUILD)
+ifeq ($(egg_CMDGOAL_FORCEBUILD), true)
+#$(warning egg_CMDGOAL_FORCEBUILD)
 
 ifeq ($(MAKECMDGOALS),)
-NEWGOAL := all
+egglib_NEWGOAL := all
 else
-NEWGOAL := $(MAKECMDGOALS)
+egglib_NEWGOAL := $(MAKECMDGOALS)
 endif
-OLDGOAL := $(shell if [ -f $(NEW_TARGET_FORCEBUILD_FILE) ]; then cat $(NEW_TARGET_FORCEBUILD_FILE); else echo __empty__; fi)
+egglib_OLDGOAL := $(shell if [ -f $(egg_CMDGOAL_FORCEBUILD_FILE) ]; then cat $(egg_CMDGOAL_FORCEBUILD_FILE); else echo __empty__; fi)
 #$(warning $(OLDGOAL))
 #$(warning $(NEWGOAL))
-dummy := $(shell echo $(NEWGOAL) > $(NEW_TARGET_FORCEBUILD_FILE))
+egglib_dummy := $(shell echo $(egglib_NEWGOAL) > $(egg_CMDGOAL_FORCEBUILD_FILE))
 
-ifneq ($(NEWGOAL),clean)
-ifneq ($(OLDGOAL),clean)
-ifneq ($(MAKECMDGOALS),$(OLDGOAL))
-ifneq ($(NEWGOAL), $(OLDGOAL))
+ifneq ($(egglib_NEWGOAL),clean)
+ifneq ($(egglib_OLDGOAL),clean)
+ifneq ($(MAKECMDGOALS),$(egglib_OLDGOAL))
+ifneq ($(egglib_NEWGOAL), $(egglib_OLDGOAL))
 
 #$(warning DELETE)
-#$(warning $(RM) $(BUILD_OBJECTS) $(BUILD_DEPS) $(TARGET))
-dummy := $(shell $(RM) $(BUILD_OBJECTS) $(BUILD_DEPS) $(TARGET) $(AUTO_SOURCES) $(AUTO_HEADERS))
+#$(warning $(RM) $(egglib_BUILD_OBJECTS) $(egglib_BUILD_DEPS) $(egg_TARGET))
+egglib_dummy := $(shell $(RM) $(egglib_BUILD_OBJECTS) $(egglib_BUILD_DEPS) $(egg_TARGET) $(egg_AUTO_SOURCES) $(egg_AUTO_HEADERS))
 
 endif
 endif
@@ -152,80 +164,71 @@ endif
 
 endif
 
-
-
-### Standard goals supported by eggmake:
-all : $(TARGET)
-debug : $(TARGET)
-trace : $(TARGET)
-debugtrace : $(TARGET)
-static: $(TARGET)
-staticdebug: $(TARGET)
-statictrace: $(TARGET)
-staticdebugtrace: $(TARGET)
 
 
 ### Remove all compilation files.
 clean :
-ifneq ($(NEW_TARGET_FORCEBUILD_FILE),)
-	-$(RM) $(NEW_TARGET_FORCEBUILD_FILE)
+ifneq ($(egg_CMDGOAL_FORCEBUILD_FILE),)
+	-$(RM) $(egg_CMDGOAL_FORCEBUILD_FILE)
 endif
 # Warning, the following clean command is repeated in new_target_forcerebuild section.
-	-$(RM) $(BUILD_OBJECTS) $(BUILD_DEPS) $(TARGET) $(AUTO_SOURCES) $(AUTO_HEADERS)
-ifneq ($(strip $(BUILD_DIR)),)
-	-$(RM) -r $(BUILD_DIR)
+	-$(RM) $(strip $(egglib_BUILD_OBJECTS) $(egglib_BUILD_DEPS) $(egg_TARGET) $(egg_AUTO_SOURCES) $(egg_AUTO_HEADERS))
+ifneq ($(strip $(egg_BUILD_DIR)),)
+	-$(RM) -r $(strip $(egg_BUILD_DIR))
 endif
+
 
 
 ### Add the makefile itself as a build dependency.
-MAKEFILENAME := $(firstword $(MAKEFILE_LIST))
-ifeq ($(MAKEFILE_FORCEBUILD),true)
-$(BUILD_DEPS) $(BUILD_OBJECTS) : $(MAKEFILENAME)
+ifeq ($(egg_MAKEFILE_FORCEBUILD),true)
+$(egglib_BUILD_DEPS) $(egglib_BUILD_OBJECTS) : $(firstword $(MAKEFILE_LIST))
 endif
 
 
 ### Include dependencies, but only if we're not cleaning.
 ifneq ($(MAKECMDGOALS),clean)
--include $(BUILD_DEPS)
+-include $(egglib_BUILD_DEPS)
 endif
 
 
+
 ### Program linking:
-$(TARGET) : $(BUILD_OBJECTS)
-	$(strip $(LD) $^ $(FRAMEWORKS) -o $@ $(FINAL_LDFLAGS))
+$(egg_TARGET) : $(egglib_BUILD_OBJECTS)
+	$(strip $(egglib_LD) $^ $(egg_FRAMEWORKS) -o $@ $(egglib_FINAL_LDFLAGS) $(egglib_FINAL_LDLIBS))
+
 
 
 ### Implicit rules for objects and dependencies, C language.
-$(BUILD_DIR_SLASH)%.o: %.c
-	$(strip $(CC) $(CDEFINES) $(CFLAGS) $(CINCLUDES) -c $< -o $@)
+$(egglib_BUILD_DIR_SLASH)%.o: %.c
+	$(strip $(CC) $(egglib_FINAL_CFLAGS) -c $< -o $@)
 
-$(BUILD_DIR_SLASH)%.d: %.c
-	$(strip $(CC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.o -MT $@ $(CDEFINES) $(CFLAGS) $(CINCLUDES) $<)
-#	$(CC) -MM $(CDEFINES) $(CFLAGS) $(CINCLUDES) $< | sed 's/\($(subst /,\/,$*)\)\.o[ :]*/$(BUILD_DIR_SLASH_SED)\1.o $(subst /,\/,$@) : /g' > $@;
+$(egglib_BUILD_DIR_SLASH)%.d: %.c
+	$(strip $(CC) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.o -MT $@ $(egglib_FINAL_CFLAGS) $<)
+
 
 
 ### Implicit rules for objects and dependencies, C++ language.
-$(BUILD_DIR_SLASH)%.opp: %.cpp
-	$(strip $(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@)
-$(BUILD_DIR_SLASH)%.oxx: %.cxx
-	$(strip $(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@)
-$(BUILD_DIR_SLASH)%.o++: %.++
-	$(strip $(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@)
-$(BUILD_DIR_SLASH)%.oo: %.cc
-	$(strip $(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@)
-$(BUILD_DIR_SLASH)%.O: %.C
-	$(strip $(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@)
+$(egglib_BUILD_DIR_SLASH)%.opp: %.cpp
+	$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
+$(egglib_BUILD_DIR_SLASH)%.oxx: %.cxx
+	$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
+$(egglib_BUILD_DIR_SLASH)%.o++: %.++
+	$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
+$(egglib_BUILD_DIR_SLASH)%.oo: %.cc
+	$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
+$(egglib_BUILD_DIR_SLASH)%.O: %.C
+	$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
 
-$(BUILD_DIR_SLASH)%.$.dpp: %.cpp
-	$(strip $(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.opp -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<)
-$(BUILD_DIR_SLASH)%.$.dxx: %.cxx
-	$(strip $(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.oxx -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<)
-$(BUILD_DIR_SLASH)%.$.d++: %.c++
-	$(strip $(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.o++ -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<)
-$(BUILD_DIR_SLASH)%.$.dd: %.cc
-	$(strip $(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.oo -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<)
-$(BUILD_DIR_SLASH)%.$.D: %.C
-	$(strip $(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.O -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<)
+$(egglib_BUILD_DIR_SLASH)%.$.dpp: %.cpp
+	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.opp -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+$(egglib_BUILD_DIR_SLASH)%.$.dxx: %.cxx
+	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.oxx -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+$(egglib_BUILD_DIR_SLASH)%.$.d++: %.c++
+	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.o++ -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+$(egglib_BUILD_DIR_SLASH)%.$.dd: %.cc
+	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.oo -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+$(egglib_BUILD_DIR_SLASH)%.$.D: %.C
+	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.O -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
 
 
 
@@ -239,8 +242,7 @@ $(BUILD_DIR_SLASH)%.$.D: %.C
 # #	$(CXXC) -MM $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $< | sed 's/\($(subst /,\/,$*)\)\.o[ :]*/$(BUILD_DIR_SLASH_SED)\1.$(OBJ_EXT) $(subst /,\/,$@) : /g' > $@;
 
 
-# ### Implicit rules for objects and dependencies, C++ language.
-# ### Old version.
+# ### Old version inside a define, again not working.
 # define CXXRULES
 
 # OBJ_EXT = $(subst c,o,$(1)) 
@@ -250,7 +252,7 @@ $(BUILD_DIR_SLASH)%.$.D: %.C
 # 	$(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@  
 
 # $(BUILD_DIR_SLASH)%.$(DEP_EXT): %.$(1)
-# 	$(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.$(OBJ_EXT) -MT $@ 
+# 	$(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.$(OBJ_EXT) -MT $@
 
 # endef
 
@@ -266,6 +268,6 @@ $(BUILD_DIR_SLASH)%.$.D: %.C
 # ### debug print
 #	echo $(OBJECTS)
 #	echo $(DEPS)
-# $(warning $(MAKEFILENAME))
+# $(warning $(egglib_OBJECTS))
 # $(error error)
 

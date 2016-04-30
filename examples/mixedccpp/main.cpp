@@ -7,4 +7,6 @@ int main (void)
     print_cobject ();
     print_cppobject ();
     print_ccobject ();
+
+    return 0;
 }

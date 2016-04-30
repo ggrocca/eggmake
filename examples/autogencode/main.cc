@@ -7,5 +7,6 @@ int main ()
 {
     printf ("%s\n", ZVING_STRING);
     azang ();
+
     return 0;
 }

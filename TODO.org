@@ -1,40 +1,41 @@
 * Ongoing Tasks
 
-- use strip to get rid of whitespace before issuing compilation commands
-
 - multitarget.mk should work by including and not by calling make (go on a new feature branch)
 
 ** Create proper examples
    - every feature should have a small working stub project as an example
 *** vpath
     show usage of vpath for adding directories.
-*** flags
-    complete the flags example with all possibile flags.
+*** libraries
+    when support for libraries is added, library compilation
+*** example for importing external, not system libs.
+    with custom EXTERNAL_LIBS_DIR
 
-** default values, better names for variables
-- should force/search sane defaults values for not-default variables not defined
-- for example, NO_DIRECTORY_PRINT in multitarget should default to true.
-https://www.gnu.org/software/make/manual/html_node/Undefine-Directive.html
+** goalflags.mk
+- should remove the staticdebugantani crazyness, read MAKE_CMD_GOALS and do that on the commmand line
+do something like current multitarget.mk to read the goals, and do the proper flag override. this could be done in a goalflags.mk file
 
-*** Better separation between standard, environment and private names for targets and variable. distinguish:
-   - default or customary variables that are already defined by make with default values. The user may change them on the command line, or inside the makefiles describing the project (read them, do not set them in the library)      https://www.gnu.org/software/make/manual/html_node/Implicit-Variables.html
-   - PROTECTED variables known to eggmake, set by makefiles describing the project, and read by the library engine.mk;
-   - PRIVATE variables used internally by engine.mk
-   - think about separation between standard and custom targets:
+- check standard targets to provide:
    http://www.gnu.org/software/make/manual/html_node/Standard-Targets.html
+- http://stackoverflow.com/questions/4035013/using-gnu-make-to-build-both-debug-and-release-targets-at-the-same-time
 
+** Add support for custom compilation goals, eg for additional cross compilation builds
+- a mechanism for custom goals and a mechanism for switching on several gol "types" at the same time should work together.
+- the above mechanism should be meta-programmable - the goal <mygoal> is added to a list of goals (egg_GOALS), and the variable <mygoal_FLAGS> is added to egglib_FINAL_FLAGS
+- or, whoever is adding the goal could add proper goal/variable handling..
+*** old considerations
+   - depending on how it's done, should this feature replace the all/debug/..../statictracedebug system (which is ugly anyway)?
+   - users should be able to add custom targets of their choosing, which enable different build options. At the end of the makefile they write FINAL_FLAGS and FINAL_LDFLAGS according to the targets.
+   - Maybe using metaprogramming in multitarget.mk:
+     http://make.mad-scientist.net/secondary-expansion/
+   - and/or the foreach function, iterated over a list of possible targets - this would eliminate the copy-pasted code in multitarget.mk
 
+idea: there should be a stdtarget.mk makefile that implements the all/debug/.../statictracedebug system (and should add a release target for additional flags that go in release only?). users could import it or not, and they should have facilities for adding custom target names to the system, and make them work within all other features as they were native.
 
 
 
 ** Support adding files by directories
    all C/C++ files in the directory will be added as sources, c files as C sources and C++ files as C++ sources. If no sources and no directory are given, default to current dir.
-
-** write the smallest possible example, check that it works.
-TARGET := target
-SOURCES := main.c
-include ../../eggmakelib/engine.mk
-and add it as code at the beginning of README.md
 
 - with sane defaults and support for adding all files in a directory, and SOURCES defaulting to all C/C++ files in the same dir as the makefile, the smallest makefile should build target from SOURCES
 
@@ -56,8 +57,7 @@ http://stackoverflow.com/questions/9691508/how-can-i-use-macros-to-generate-mult
    - should add variable to suppress generation of dependencies
    - should add customizable command for dependecies generation
 
-
-** Create a sysutil.mk library
+** Create an envsys.mk library for env/system checks
 *** write simple functions for if checking
     - check if variable equal a string
     - check if variable equals one in a list of strings
@@ -78,7 +78,7 @@ http://stackoverflow.com/questions/9691508/how-can-i-use-macros-to-generate-mult
     [[https://www.freedesktop.org/software/systemd/man/os-release.html][documentation on linux /etc/os-release]]
     [[http://linuxmafia.com/faq/Admin/release-files.html][table for other unixes release files]]
 
-
+*** username recognition as a library
 ** Add support for creating different directories for different compilation targets instead of cleaning everything.
    - For example, build.release and build.debug (or build.program.debug etctc)
    - Option for choosing between: "only the executable of the last build is left in the root directory (build dirs act as object caches)" vs "the executable is in the build dir". Another possibility: a certain target activates the option "copy executable to root", all other executables stay in the build directory.
@@ -87,21 +87,10 @@ http://stackoverflow.com/questions/9691508/how-can-i-use-macros-to-generate-mult
 
 
 * Future Tasks
-
 ** Support for library compilation
    - What additional features are needed?
    - dynamic and static libraries?
    
-** Add support for custom compilation targets, eg for additional cross compilation builds
-   - depending on how it's done, should this feature replace the all/debug/..../statictracedebug system (which is ugly anyway)?
-   - users should be able to add custom targets of their choosing, which enable different build options. At the end of the makefile they write FINAL_FLAGS and FINAL_LDFLAGS according to the targets.
-   - Maybe using metaprogramming in multitarget.mk:
-     http://make.mad-scientist.net/secondary-expansion/
-   - and/or the foreach function, iterated over a list of possible targets - this would eliminate the copy-pasted code in multitarget.mk
-
-idea: there should be a stdtarget.mk makefile that implements the all/debug/.../statictracedebug system (and should add a release target for additional flags that go in release only?). users could import it or not, and they should have facilities for adding custom target names to the system, and make them work within all other features as they were native.
-
-
 ** install.sh script
    which exports the library files to a given location.
    - -g,--global (default dir becomes /opt/local/share/, requires sudo)
@@ -111,7 +100,6 @@ idea: there should be a stdtarget.mk makefile that implements the all/debug/.../
    - -i,--install
    - -c check if version in dir and version in repo differs, and which one is newer.
    - -r remove
-
 
 ** Consider support for multiple executables that share a single build directory structure
    - This would be useful for compiling executables that depend over almost the same set of object files and are often recompiled together. Object files would be copmiled once.
@@ -151,7 +139,6 @@ idea: there should be a stdtarget.mk makefile that implements the all/debug/.../
    - the whole "submake" problem must be approached again...
 
 ** Facilities for testing (unit testing etc)?
-
 ** Incorporate gmsl
    and use its features to help with conditional compiling
    http://gmsl.sourceforge.net/

@@ -6,103 +6,96 @@
 ### Project configuration section.
 
 ## executable name
-# TARGET = exe
-TARGET := target.out
+# egg_TARGET := exe
+egg_TARGET := target.out
 
-## Directory where build junk goes. Comment this line out or leave
-## empty if you want to build in the working directory.
-# BUILD_DIR = build-dir
-BUILD_DIR := build
+## Directory where build junk goes. Explicitly declare this variable
+## empty if you want to build in the working directory. Default
+## value(if not declared): build.<target_name>
+# egg_BUILD_DIR := your_build_dir_name.$(egg_TARGET)
+# egg_BUILD_DIR :=
 
 ## Additional directories for source files
-# VPATH = add/dir1 ../add/dir2 ../../etc/
-VPATH =
+# SOURCE_PATH := add/dir1 ../add/dir2 ../../etc/
+egg_SOURCE_PATH :=
 
-## Directory for external libraries
-## not used outside the configuration section and provided for your
-## convenience when defining INCLUDES and LDFLAGS. Define as many as
-## such variables as you need.
-# BASELIBS_DIR = ../../external/libs/dir
-BASELIBS_DIR =
-
-## select the C and C++ compilers
-# CXXC =
+## select the C and C++ compilers. Eggmake uses the default variable
+## names set by make; overwrite them if you need to use a different
+## compiler.
+# CXX =
 # CC =
-CXXC = g++
-CC = gcc
-
 
 ## Names of files to compile, without path. Warning: you cannot have
 ## files with the same names in different directories, because the
 ## names of object files will conflict.
-# SOURCES = file1.c file2.cc file3.cpp
-SOURCES = main.c
+# egg_SOURCES = file1.c file2.cc file3.cpp
+egg_SOURCES := main.c
 
 
 #####################
 ### Compilation flags
 
-## generic compilation configuration, to be used for both C++ and C on
-## every OS.
+## Available targets are:
+## release, debug, trace, static
+## And various combinations of them:
+## tracerelease, tracedebug, staticdebug, staticrelease, statictrace, statictracerelease, statictracedebug
 
-## FLAGS are always used, while DEBUG_FLAGS are used instead of
-## RELEASE flags when "make debug" is used.
+## egg_FLAGS are always used.
+## egg_RELEASE_FLAGS are used in release mode.
+## egg_DEBUG_FLAGS are used in the debug mode.
+## egg_TRACE_FLAGS are used in trace mode.
+## egg_STATIC_FLAGS are used in static mode.
 
-## STATIC_LDFLAGS are used instead of LDFLAGS if "make static" is
-## used.
+## trace flags work as secondary debug flags to allow static
+## compilation of additional verbosity or messages in your program,
+## which can be added indipendently of debug symbols - useful if you
+## have to debug bugs that happen in release mode but not in debug
+## mode, as it sometimes happens in parallel programs.
 
-## TRACE_FLAGS work as secondary DEBUG_FLAGS for static compilation of
-## additional verbosity or messages in your program, which can be
-## added indipendently of debug symbols - useful if you have to debug
-## bugs that happen in release mode but not in debug mode.
-
-## Available targets offer all the combinations of debug, trace,and static:
-## "debug trace debugtrace static staticdebug statictrace staticdebugtrace"
-
-# override FLAGS +=
-# override DEBUG_FLAGS +=
-# override TRACE_FLAGS +=
-# override RELEASE_FLAGS +=
-# override STATIC_FLAGS +=
-# override INCLUDES +=
-# override DEFINES +=
-# override LDFLAGS +=
-# override STATIC_LDFLAGS +=
-# override FRAMEWORKS +=
-
-override FLAGS += 
-override DEBUG_FLAGS +=
-override TRACE_FLAGS +=
-override RELEASE_FLAGS +=
-override STATIC_FLAGS +=
-override INCLUDES +=
-override DEFINES +=
-override LDFLAGS +=
-override STATIC_LDFLAGS +=
-override FRAMEWORKS +=
+## egg_LDFLAGS are flags to the linker
+## egg_LDLIBS are for defining libraries (-l</path> or <lib.a>)
+## egg_STATIC_LDFLAGS are used instead of egg_LDFLAGS in static mode
+## egg_STATIC_LDLIBS := are used instead of egg_LDLIBS in static mode
+## egg_FRAMEWORKS :=
 
 
-## Language dependent configuration. Ignore this section if your
-## project use C++ only or C only without mixing the two. When using
-## both languages, the C++ compiler is the one called in the linking
-## phase.
+# # flags to the compiler/preprocessor.
+# # Eggmake also reads standard CPPFLAGS var.
+# egg_FLAGS := -Wall
+# egg_RELEASE_FLAGS := -O3
+# egg_DEBUG_FLAGS := -g
+# egg_TRACE_FLAGS := -DVERBOSE_TRACE
+# egg_STATIC_FLAGS := -Duse_static_lib_opt
+egg_FLAGS := 
+egg_RELEASE_FLAGS := 
+egg_DEBUG_FLAGS :=
+egg_TRACE_FLAGS :=
+egg_STATIC_FLAGS :=
 
-# # C specific conf
-# override CFLAGS +=
-# override CINCLUDES +=
-# override CDEFINES +=
-override CFLAGS +=
-override CINCLUDES +=
-override CDEFINES +=
 
-# # C++ specific conf
-# override CXXFLAGS +=
-# override CXXINCLUDES +=
-# override CXXDEFINES +=
-override CXXFLAGS +=
-override CXXINCLUDES +=
-override CXXDEFINES +=
+# # Language dependent flags.
+# # Eggmake also reads standard CFLAGS and CXXFLAGS vars.
+# egg_CFLAGS := -stdc99
+# egg_CXXFLAGS := -stdc++11
+egg_CFLAGS :=
+egg_CXXFLAGS :=
+## Ignore this section if your project use C++ only or C only without
+## mixing the two. When using both languages, the C++ compiler is the
+## one called in the linking phase.
 
+
+# # flags to the linker.
+# # Eggmake also reads standard LDFLAGS and LDLIBS vars.
+# egg_LDFLAGS := -L../path/to/dir/with/libs
+# egg_LDLIBS := -lyourlib
+# egg_STATIC_LDFLAGS := -static
+# egg_STATIC_LDLIBS := path/to/file.a
+# egg_FRAMEWORKS := -framework GLUT -framework OpenGL
+egg_LDFLAGS :=
+egg_LDLIBS :=
+egg_STATIC_LDFLAGS :=
+egg_STATIC_LDLIBS :=
+egg_FRAMEWORKS :=
 
 
 
@@ -110,10 +103,9 @@ override CXXDEFINES +=
 ### System-dependent configuration. 
 
 ## Here add system-dependent settings to previous variables, using the
-## syntax `override +=' if you want to add things, ` override =' if
-## you want to replace them. A simple mechanism with uname is
-## currently used. Generic is used as a catch-all implementation,
-## currently targeting linux.
+## syntax `+=' if you want to add things, `=' if you want to replace
+## them. A simple mechanism with uname is currently used. Generic is
+## used as a generic catch-all implementation for UNIX-like systems.
 
 # # recognition
 # UNAME := $(shell uname -s)
@@ -121,7 +113,7 @@ override CXXDEFINES +=
 
 # # MACOSX
 # ifeq ($(UNAME),Darwin)
-# override VAR += whatever
+# egg_VAR += whatever
 # GENERIC = false
 # endif
 # # MACOSX
@@ -131,10 +123,9 @@ override CXXDEFINES +=
 
 # # generic UNIX
 # ifeq ($(GENERIC),true)
-# override VAR += whatever
+# egg_VAR += whatever
 # endif
 # # generic UNIX
-
 
 
 
@@ -147,40 +138,28 @@ override CXXDEFINES +=
 
 # # Testing for a single username
 # ifeq ($(shell whoami),jane)
-# override VAR += whatever
+# egg_VAR += whatever
 # endif
 
 # # Testing for multiple usernames: 
 # ifneq (,$(filter $(shell whoami),alice bob))
-# override VAR += whatever
+# egg_VAR += whatever
 # endif
-
-
-
-
-###############################
-### General Makefile behaviour.
-
-# # If the makefile changes, everything is rebuilt from scratch.
-# MAKEFILE_FORCEBUILD := true
-MAKEFILE_FORCEBUILD := true
-
-# # If the make goal changes, everything is rebuilt from scratch.
-# NEW_TARGET_FORCEBUILD := true
-# NEW_TARGET_FORCEBUILD_FILE := .file_old_goal
-NEW_TARGET_FORCEBUILD := true
-NEW_TARGET_FORCEBUILD_FILE := $(BUILD_DIR)/.make_previous_goal
 
 
 
 #############################
 ### Automatic code generation
 
-# # C/C++ automatically generated source and header files.
-# AUTO_SOURCES := 
-# AUTO_HEADERS := 
-AUTO_SOURCES := 
-AUTO_HEADERS := 
+## C/C++ automatically generated source and header files. Tell eggmake
+## the names of files tht will be generated (so eggmake knows that
+## they can be cleaned, for example), and devise appropriate rules to
+## generate them.
+
+# egg_AUTO_SOURCES := 
+# egg_AUTO_HEADERS := 
+egg_AUTO_SOURCES := 
+egg_AUTO_HEADERS := 
 
 # # Custom rules for code generation
 # %.auto.hh : %.def
@@ -194,6 +173,25 @@ AUTO_HEADERS :=
 ## $@ -> matching target
 ## $< -> matching prerequisite
 ## $* -> matched pattern (the part common to both target and prerequisite)
+
+
+
+###############################
+### General Makefile behaviour.
+
+## By default, If the makefile changes, everything is rebuilt from
+## scratch. Disable this by setting the following variable to false.
+# egg_MAKEFILE_FORCEBUILD := false
+
+## By default, if the make goal changes, everything is rebuilt from
+## scratch. Disable this by setting the following variable to false.
+# egg_CMDGOAL_FORCEBUILD := false
+
+## set a custom file for keeping track of the previous goal if the
+## previous option is enabled. Default value:
+## $(egg_BUILD_DIR)/.eggmake_previous_goal
+# egg_CMDGOAL_FORCEBUILD_FILE = $(egg_BUILD_DIR)/your_file_name_here.
+
 
 
 ############################################

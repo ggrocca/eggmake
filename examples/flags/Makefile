@@ -1,54 +1,25 @@
-###///  -- eggMake --  \\\###
-###\\\ Example project ///###
+egg_SOURCES = main.c
+
+MY_DEFINES := -DAZANG -DZVING
+MY_INCLUDES := -I/usr/include/
+
+egg_FLAGS := -Wall $(MY_DEFINES) $(MY_INCLUDES)
+egg_RELEASE_FLAGS := -O3
+egg_DEBUG_FLAGS := -g 
+egg_TRACE_FLAGS := -DVERBOSE_TRACE
+egg_STATIC_FLAGS := -Duse_static_lib_opt
+egg_CFLAGS := -std=c99
+egg_CXXFLAGS := -std=c++11
 
 
-##################################
-### Project configuration section.
-
-## executable name
-TARGET := target.out
-
-## Directory where build junk goes. Comment this line out or leave
-## empty if you want to build in the working directory.
-BUILD_DIR := build
-
-## Additional directories for source files
-VPATH =
+egg_COMMON_FLAGS += -DCOMMON
+egg_RELEASE_FLAGS += -DRELEASE
+egg_DEBUG_FLAGS += -DDEBUG
+egg_TRACE_FLAGS += -DVERBOSE_TRACE
+egg_STATIC_FLAGS += -DSTATIC
+egg_CFLAGS += -DPLAIN_C
+egg_CXXFLAGS += -DCPLUSPLUS
 
 
-## Names of files to compile, without path.
-SOURCES = main.c
-
-## Compile flags
-override FLAGS += -DFLAGS
-override DEBUG_FLAGS += -DDEBUG_FLAGS
-override TRACE_FLAGS +=
-override RELEASE_FLAGS +=
-override STATIC_FLAGS +=
-override INCLUDES +=
-override DEFINES +=
-override LDFLAGS +=
-override STATIC_LDFLAGS +=
-override FRAMEWORKS +=
-
-
-
-###############################
-### General Makefile behaviour.
-
-## If the makefile changes, everything is rebuilt from scratch.
-# MAKEFILE_FORCEBUILD := true
-MAKEFILE_FORCEBUILD := true
-
-## If the make goal changes, everything is rebuilt from scratch.
-# NEW_TARGET_FORCEBUILD := true
-# NEW_TARGET_FORCEBUILD_FILE := .file_old_goal
-NEW_TARGET_FORCEBUILD := true
-NEW_TARGET_FORCEBUILD_FILE := $(BUILD_DIR)/.make_previous_goal
-
-
-
-############################################
-## include eggmake compilation functionality.
 include ../../eggmakelib/engine.mk
-############################################
+

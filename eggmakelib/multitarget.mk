@@ -6,79 +6,51 @@
 ###\\\  -- -- -- -- -- ------- -- -- -- -- --  ///###
 
 
-PHONY_TARGETS := all clean debug trace debugtrace static staticdebug statictrace staticdebugtrace
 
-.PHONY : $(PHONY_TARGETS) $(TARGETS)
+egglib_PHONY_TARGETS := clean release debug trace static tracerelease tracedebug staticrelease staticdebug statictrace statictracerelease statictracedebug
+.PHONY : all $(egglib_PHONY_TARGETS) $(egg_TARGET_LIST)
 
-all: $(TARGETS)
+all: $(egg_TARGET_LIST)
 
-#$(warning $(MAKECMDGOALS))
 
-ifneq ($(filter clean, $(MAKECMDGOALS)),)
-PASSTARGET := clean
-ifeq ($(words $(MAKECMDGOALS)),1)
-clean : $(TARGETS)
-endif
-endif
+# define egglib_PASSRULE
+# ifneq ($(filter $(1), $(MAKECMDGOALS)),)
+# egglib_PASSTARGET := $(1)
+# ifeq ($(words $(MAKECMDGOALS)),1)
+# $(1) : $(egg_TARGET_LIST)
+# endif
+# endif
+# endef
 
-ifneq ($(filter debug, $(MAKECMDGOALS)),)
-PASSTARGET := debug
-ifeq ($(words $(MAKECMDGOALS)),1)
-debug : $(TARGETS)
-endif
-endif
+define egglib_PASSVAR =
+$(if $(filter $(1), $(MAKECMDGOALS)),$(eval egglib_PASSTARGET := $(1)))
+endef
 
-ifneq ($(filter trace, $(MAKECMDGOALS)),)
-PASSTARGET := trace
-ifeq ($(words $(MAKECMDGOALS)),1)
-trace : $(TARGETS)
-endif
-endif
+define egglib_PASSRULE =
+$(if $(filter $(1), $(MAKECMDGOALS)),$(if $(filter $(words $(MAKECMDGOALS)),1),$(eval $(1) : $(egg_TARGET_LIST))))
+endef
 
-ifneq ($(filter debugtrace, $(MAKECMDGOALS)),)
-PASSTARGET := debugtrace
-ifeq ($(words $(MAKECMDGOALS)),1)
-debugtrace : $(TARGETS)
-endif
+$(foreach rule, $(egglib_PHONY_TARGETS), $(call egglib_PASSVAR, $(rule)))
+$(foreach rule, $(egglib_PHONY_TARGETS), $(call egglib_PASSRULE, $(rule)))
+
+
+
+# egg_NO_PRINT_DIR defaults to true
+ifeq ($(origin egg_NO_PRINT_DIR), undefined)
+egg_NO_PRINT_DIR := true
 endif
 
-ifneq ($(filter static, $(MAKECMDGOALS)),)
-PASSTARGET := static
-ifeq ($(words $(MAKECMDGOALS)),1)
-static : $(TARGETS)
-endif
-endif
-
-ifneq ($(filter staticdebug, $(MAKECMDGOALS)),)
-PASSTARGET := staticdebug
-ifeq ($(words $(MAKECMDGOALS)),1)
-staticdebug : $(TARGETS)
-endif
-endif
-
-ifneq ($(filter statictrace, $(MAKECMDGOALS)),)
-PASSTARGET := statictrace
-ifeq ($(words $(MAKECMDGOALS)),1)
-statictrace : $(TARGETS)
-endif
-endif
-
-ifneq ($(filter staticdebugtrace, $(MAKECMDGOALS)),)
-PASSTARGET := staticdebugtrace
-ifeq ($(words $(MAKECMDGOALS)),1)
-staticdebugtrace : $(TARGETS)
-endif
-endif
-
-ifeq ($(NO_PRINT_DIR),true)
-NO_PRINT_DIR_OPT=--no-print-directory
+# Don't print the directory change when calling make again,
+# if egg_NO_PRINT_DIR is true.
+ifeq ($(egg_NO_PRINT_DIR),true)
+egglib_NO_PRINT_DIR_OPT=--no-print-directory
 else
-NO_PRINT_DIR_OPT=
+egglib_NO_PRINT_DIR_OPT=
 endif
 
-$(TARGETS):
-	@$(MAKE) $(NO_PRINT_DIR_OPT) -f Makefile.$@ $(PASSTARGET)
+$(egg_TARGET_LIST):
+	@$(MAKE) $(egglib_NO_PRINT_DIR_OPT) -f Makefile.$@ $(egglib_PASSTARGET)
 
 
-$(PHONY_TARGETS):
+$(egglib_PHONY_TARGETS):
 	@echo nothing > /dev/null

@@ -2,27 +2,34 @@
 ###\\\ MultiTarget Example ///###
 
 
-# List of targets to be built. Write a makefile for each <target>,
-# with name Makefile.<target>, defining the ingredients and options
-# for making it.
-TARGETS := first_target.out second_target.out
-# In this case, Makefile.first_target.out and Makefile.second_target.out
+## List of targets to be built. Write a makefile for each <target>,
+## with name Makefile.<target>, defining the ingredients and options
+## for making it.
+
+## In this case, Makefile.first_target.out and Makefile.second_target.out:
+egg_TARGET_LIST := first_target.out second_target.out
 
 
-### Compile in the usual way:
+## by default, eggmake avoids annoying message lines about directory
+## changes when doing multitarget compilation. Set the following
+## variable to false to disable this.
+# egg_NO_PRINT_DIR := false
 
-# `$ make` makes all targets
-# `$ make <target_name_1> <target_name_2>` makes the specified targets.
 
-### specific goal qualifiers (debug, trace, static, etc) can be used
-### on both all targets and specific targets:
+##########################
+### Usage instructions ###
+#########################
 
+###### Compile:
+### `$ make` makes all targets
+### `$ make <target_name_1> <target_name_2>` makes the specified targets.
+
+###### specific goal qualifiers (debug, trace, static, etc) can be
+###### used on both all targets and specific targets:
 # `$ make debug`
 # `$ make <target_name> debug`
 
 
-# avoid anoying message lines about directory changes.
-NO_PRINT_DIR := true
 
 ###########################################
 # include eggmake multitarget functionality.
