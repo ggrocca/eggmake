@@ -20,7 +20,7 @@ Essentially, EggMake offers a general, fully-featured Makefile with a lot of aut
 
 ## Status
 
-This is alpha software; it's more of a rough proof-of-concept that anything else. It should work fine for building experimental and specialized software projects in academic environments, though, where you usually have very small teams doing experimental work that changes fast. In fact, most of its features have been developed with this use case in mind. It should be very easy for each developer/researcher to customize his build and commit everything to a common repository without breaking the work of other co-developers. However, as more complex features are added (e.g. for taking care of testing, distribution and installation), there is no reason for EggMake not being able to scale to bigger, more production-like projects.
+This is alpha software; it's a rough proof-of-concept more than anything else. It should work fine for building experimental and specialized software projects in research environments, though, where you usually have very small teams doing fast-changing work. In fact, most of its features have been developed with this use case in mind. It should be very easy for each developer/researcher to customize his build and commit everything to a common repository without breaking the work of other co-developers. However, as more complex features are added (e.g. for taking care of testing, distribution and installation), there is no reason for EggMake not being able to scale to bigger, more production-like projects.
 
 
 ## Prerequisites and installation
@@ -67,7 +67,7 @@ Set the following things:
 * Optionally, customize your preprocessor and compiler flags. See a very rough example in `examples/flags/Makefile`). `egg_FLAGS` flags are always used, and you can add there any custom directive, include or define:
 
 		MY_DEFINES := -DAZANG -DZVING
-		MY_INCLUDES := /usr/include/
+		MY_INCLUDES := -I/usr/include/
 		egg_FLAGS := -Wall $(MY_DEFINES) $(MY_INCLUDES)
 EggMake also adds any flag you might define with customary `CPPFLAGS` (preprocessor flags), `CFLAGS` (C specific) or `CXXFLAGS` (C++ specific) variables in your command line or environment.
 
@@ -75,7 +75,7 @@ EggMake also adds any flag you might define with customary `CPPFLAGS` (preproces
 
 		egg_LDFLAGS := -L/opt/local/lib
 		egg_LDLIBS := -loptlib
-EggMake also adds any flag that you might define with customary `LDFLAGS` and `LDLIBS` variables in your command line or environment.
+EggMake also adds any flag that you might define inside standard `LDFLAGS` and `LDLIBS` variables in your command line, or in your environment.
 
 * Finally, include the eggmake library:
 
@@ -117,7 +117,7 @@ Things that work out of the box:
 
 Additional things you can do:
 
-* __Easy configuration of custom compilation flags, used by different types of targets__. Commands `make` or `make all` get you a barebone compilation that uses only the standard compilation flags that you define. Currently implemented custom targets are: `release` (for final optimization flags), `debug` (debugging flags), `make trace` (statically compiled verbose tracing output), `make static` (a statically linked binary), and combinations of them (`tracerelease tracedebug staticrelease staticdebug statictrace statictracerelease statictracedebug`). It's up to you to fill in the right flags for compiling these modes for your project, if you care about using them. The corresponding flag names are quite intuitive:
+* __Easy configuration of custom compilation flags, used by different types of targets__. Commands `make` or `make all` get you a barebone compilation that uses only the standard compilation flags that you define. Currently implemented custom targets are: `release` (for final optimization flags), `debug` (debugging flags), `make trace` (statically compiled verbose tracing output), `make static` (a statically linked binary), and combinations of them (`tracerelease`, `tracedebug`, `staticrelease`, `staticdebug`, `statictrace`, `statictracerelease`, `statictracedebug`). It's up to you to fill in the right flags for compiling these modes for your project, if you care about using them. The corresponding flag names are quite intuitive:
 
 		### compilation flags
 		egg_COMMON_FLAGS := -Wall            # Used in all cases
@@ -136,7 +136,7 @@ Additional things you can do:
 		egg_FRAMEWORKS := -framework frame
 
 
-* __Projects that mix linking of both C and C++ code at the same time are supported__. C and C++ have language specific flags that you can add (`egg_CFLAGS` and `egg_CPPFLAGS`); the general flags are used for both. Files with `.c` extension are always considered C files and compiled as such. Files with extensions `.cpp .cxx .c++ .cc .C` are considered C++ sources. Header files may have any extension (or no extension at all). Remember to wrap your C headers inside an `extern "C" { ... }` directive, if `__cplusplus` is defined. See the `mixedccpp` example.
+* __Projects that mix linking of both C and C++ code at the same time are supported__. C and C++ have language specific flags that you can add (`egg_CFLAGS` and `egg_CXXFLAGS`); the general flags are used for both. Files with `.c` extension are always considered C files and compiled as such. Files with extensions `.cpp .cxx .c++ .cc .C` are considered C++ sources. Header files may have any extension (or no extension at all). Remember to wrap your C headers inside an `extern "C" { ... }` directive, if `__cplusplus` is defined. See the `mixedccpp` example.
 
 * __Easy customization of the previously defined compilation flags depending on the current environment and system__ (operating system, hostname, username, etc). See commented out `System-dependent configuration` and `User-dependent configuration` sections in the reference Makefile. These are just suggestions, you can modify the compilation flags using any custom check you want by calling out arbitrary shell commands and by reading environment variables. For example:
 
