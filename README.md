@@ -12,7 +12,7 @@ In the simplest case, it's enough to write a `Makefile` that:
 
 * Includes the EggMake library
 
-		include ./eggmakelib/engine.mk`
+		include ./eggmakelib/engine.mk
 
 * And then, everything works. Type `make` and compile your project.
 
@@ -59,9 +59,10 @@ Set the following things:
 
 		egg_SOURCES := main.cpp module.cpp again_cpluplus.cc and_plain_C_too.c
 
-* If your sources are to be found in directories different from the working where the makefile is, add them to `egg_SOURCE_PATH`. Do not add directory names to `SOURCES`. There is no need to add the working directory, and relative paths start from there. For example:
+* If your sources are to be found in directories different from the working directory where the makefile is, add them to `egg_SOURCE_PATH`. Do not add directory names to `SOURCES`. There is no need to add the working directory, and relative paths start from there. For example:
 
 		egg_SOURCE_PATH := common_modules/ features/baz/ features/foo/
+		<...>
 		egg_SOURCE_PATH += ../../veryfar/tree/with/othercode
 
 * Optionally, customize your preprocessor and compiler flags. See a very rough example in `examples/flags/Makefile`). `egg_FLAGS` flags are always used, and you can add there any custom directive, include or define:
@@ -121,7 +122,7 @@ Additional things you can do:
 
 		### compilation flags
 		egg_COMMON_FLAGS := -Wall            # Used in all cases
-		egg_RELEASE_FLAGS := -O3e
+		egg_RELEASE_FLAGS := -O3
 		egg_DEBUG_FLAGS := -g
 		egg_TRACE_FLAGS := -DVERBOSE_TRACE
 		egg_STATIC_FLAGS := -Dstatic_lib_opt
@@ -135,6 +136,11 @@ Additional things you can do:
 		egg_STATIC_LDLIBS := staticlib.a
 		egg_FRAMEWORKS := -framework frame
 
+
+* __Adding all the software modules contained in a specific directory automatically__. If there are directories containing a lot of files that need to be compiled, the list of files often becomes a burden to maintain. With eggmake it's possible to add them all using only the directory names, with the `egg_DIR_SOURCES` variable. Only C and C++ files with known extensions will be added (`.c .cpp .cxx .c++ .cc .C`). The search is not recursive: subdirectories must be added separately. See the `dirsources` example in the examples directory.
+
+		egg_DIR_SOURCES := one_dir other_dir one_dir/nested_dir ../../far_away_dir
+		egg_DIR_SOURCES += .     # the working directory can be added too!
 
 * __Projects that mix linking of both C and C++ code at the same time are supported__. C and C++ have language specific flags that you can add (`egg_CFLAGS` and `egg_CXXFLAGS`); the general flags are used for both. Files with `.c` extension are always considered C files and compiled as such. Files with extensions `.cpp .cxx .c++ .cc .C` are considered C++ sources. Header files may have any extension (or no extension at all). Remember to wrap your C headers inside an `extern "C" { ... }` directive, if `__cplusplus` is defined. See the `mixedccpp` example.
 

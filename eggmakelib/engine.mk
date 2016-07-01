@@ -11,7 +11,12 @@ egglib_SELF_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 include $(egglib_SELF_DIR)defaults.mk
 
 ### Set all directories that may contain the source files.
-VPATH = $(egg_SOURCE_PATH)
+VPATH = $(egg_SOURCE_PATH) $(egg_DIR_SOURCES)
+
+### Get filenames from directories
+egglib_FULL_SOURCES := $(egg_SOURCES)
+egglib_FULL_SOURCES += $(foreach dir,$(egg_DIR_SOURCES),$(wildcard $(dir)/*.c $(dir)/*.cpp $(dir)/*.cc $(dir)/*.cxx $(dir)/*.c++ $(dir)/*.C))
+egglib_SOURCES := $(notdir $(egglib_FULL_SOURCES))
 
 ### Non-file phony targets
 .PHONY : all clean release debug trace static tracerelease tracedebug staticrelease staticdebug statictrace statictracerelease statictracedebug
@@ -72,7 +77,7 @@ statictracedebug: egglib_FINAL_LDFLAGS += $(egg_STATIC_LDFLAGS)
 statictracedebug: egglib_FINAL_LDLIBS += $(egg_STATIC_LDLIBS)
 
 ### Use C++ as a linker if there are C++ sources.
-ifeq ($(strip $(filter %.cpp %.c++ %.cxx %.cc %.C, $(egg_SOURCES)) ), )
+ifeq ($(strip $(filter %.cpp %.c++ %.cxx %.cc %.C, $(egglib_SOURCES)) ), )
 egglib_LD = $(CC) $(egglib_FINAL_CFLAGS)
 else
 egglib_LD = $(CXX) $(egglib_FINAL_CXXFLAGS)
@@ -95,25 +100,25 @@ statictracedebug : $(egg_TARGET)
 
 
 ### Add automatically generated sources to the project sources
-egg_SOURCES += $(egg_AUTO_SOURCES)
+egglib_SOURCES += $(egg_AUTO_SOURCES)
 
 ### Set the list of modules to be compiled.
 #ALL_EXTENSIONS := $(addprefix ".", $(CXX_EXTENSIONS)) .c
 #OBJECTS := $(foreach ext, $(ALL_EXTENSIONS),   )
 egglib_OBJECTS :=
-egglib_OBJECTS += $(patsubst %.cpp, %.opp, $(filter %.cpp, $(egg_SOURCES)) )
-egglib_OBJECTS += $(patsubst %.c++, %.o++, $(filter %.c++, $(egg_SOURCES)) )
-egglib_OBJECTS += $(patsubst %.cxx, %.oxx, $(filter %.cxx, $(egg_SOURCES)) )
-egglib_OBJECTS += $(patsubst %.cc, %.oo, $(filter %.cc, $(egg_SOURCES)) )
-egglib_OBJECTS += $(patsubst %.C, %.O, $(filter %.C, $(egg_SOURCES)) )
-egglib_OBJECTS += $(patsubst %.c, %.o, $(filter %.c, $(egg_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.cpp, %.opp, $(filter %.cpp, $(egglib_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.c++, %.o++, $(filter %.c++, $(egglib_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.cxx, %.oxx, $(filter %.cxx, $(egglib_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.cc, %.oo, $(filter %.cc, $(egglib_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.C, %.O, $(filter %.C, $(egglib_SOURCES)) )
+egglib_OBJECTS += $(patsubst %.c, %.o, $(filter %.c, $(egglib_SOURCES)) )
 egglib_DEPS := 
-egglib_DEPS += $(patsubst %.cpp, %.dpp, $(filter %.cpp, $(egg_SOURCES)) )
-egglib_DEPS += $(patsubst %.c++, %.d++, $(filter %.c++, $(egg_SOURCES)) )
-egglib_DEPS += $(patsubst %.cxx, %.dxx, $(filter %.cxx, $(egg_SOURCES)) )
-egglib_DEPS += $(patsubst %.cc, %.dd, $(filter %.cc, $(egg_SOURCES)) )
-egglib_DEPS += $(patsubst %.C, %.D, $(filter %.C, $(egg_SOURCES)) )
-egglib_DEPS += $(patsubst %.c, %.d, $(filter %.c, $(egg_SOURCES)) )
+egglib_DEPS += $(patsubst %.cpp, %.dpp, $(filter %.cpp, $(egglib_SOURCES)) )
+egglib_DEPS += $(patsubst %.c++, %.d++, $(filter %.c++, $(egglib_SOURCES)) )
+egglib_DEPS += $(patsubst %.cxx, %.dxx, $(filter %.cxx, $(egglib_SOURCES)) )
+egglib_DEPS += $(patsubst %.cc, %.dd, $(filter %.cc, $(egglib_SOURCES)) )
+egglib_DEPS += $(patsubst %.C, %.D, $(filter %.C, $(egglib_SOURCES)) )
+egglib_DEPS += $(patsubst %.c, %.d, $(filter %.c, $(egglib_SOURCES)) )
 
 
 
@@ -197,38 +202,63 @@ $(egg_TARGET) : $(egglib_BUILD_OBJECTS)
 	$(strip $(egglib_LD) $^ $(egg_FRAMEWORKS) -o $@ $(egglib_FINAL_LDFLAGS) $(egglib_FINAL_LDLIBS))
 
 
+define egglib_cc_dep
+$(strip $(CC) $(egglib_FINAL_CFLAGS) -c $< -o $@)
+endef
+
+define egglib_cc_com
+$(strip $(CC) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.o -MT $@ $(egglib_FINAL_CFLAGS) $<)
+endef
+
+define egglib_cxx_dep
+$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.$1 -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+endef
+
+define egglib_cxx_com
+$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
+endef
 
 ### Implicit rules for objects and dependencies, C language.
 $(egglib_BUILD_DIR_SLASH)%.o: %.c
-	$(strip $(CC) $(egglib_FINAL_CFLAGS) -c $< -o $@)
+	$(egglib_cc_dep)
 
 $(egglib_BUILD_DIR_SLASH)%.d: %.c
-	$(strip $(CC) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.o -MT $@ $(egglib_FINAL_CFLAGS) $<)
-
-
+	$(egglib_cc_com)
 
 ### Implicit rules for objects and dependencies, C++ language.
 $(egglib_BUILD_DIR_SLASH)%.opp: %.cpp
-	$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
+	$(egglib_cxx_com)
 $(egglib_BUILD_DIR_SLASH)%.oxx: %.cxx
-	$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
-$(egglib_BUILD_DIR_SLASH)%.o++: %.++
-	$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
+	$(egglib_cxx_com)
+$(egglib_BUILD_DIR_SLASH)%.o++: %.c++
+	$(egglib_cxx_com)
 $(egglib_BUILD_DIR_SLASH)%.oo: %.cc
-	$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
+	$(egglib_cxx_com)
 $(egglib_BUILD_DIR_SLASH)%.O: %.C
-	$(strip $(CXX) $(egglib_FINAL_CXXFLAGS) -c $< -o $@)
+	$(egglib_cxx_com)
 
 $(egglib_BUILD_DIR_SLASH)%.$.dpp: %.cpp
-	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.opp -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+	$(call egglib_cxx_dep,opp)
 $(egglib_BUILD_DIR_SLASH)%.$.dxx: %.cxx
-	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.oxx -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+	$(call egglib_cxx_dep,oxx)
 $(egglib_BUILD_DIR_SLASH)%.$.d++: %.c++
-	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.o++ -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+	$(call egglib_cxx_dep,o++)
 $(egglib_BUILD_DIR_SLASH)%.$.dd: %.cc
-	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.oo -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+	$(call egglib_cxx_dep,oo)
 $(egglib_BUILD_DIR_SLASH)%.$.D: %.C
-	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.O -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+	$(call egglib_cxx_dep,O)
+
+
+# $(egglib_BUILD_DIR_SLASH)%.$.dpp: %.cpp
+# 	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.opp -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+# $(egglib_BUILD_DIR_SLASH)%.$.dxx: %.cxx
+# 	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.oxx -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+# $(egglib_BUILD_DIR_SLASH)%.$.d++: %.c++
+# 	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.o++ -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+# $(egglib_BUILD_DIR_SLASH)%.$.dd: %.cc
+# 	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.oo -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+# $(egglib_BUILD_DIR_SLASH)%.$.D: %.C
+# 	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.O -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
 
 
 
