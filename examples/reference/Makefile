@@ -5,25 +5,11 @@
 ##################################
 ### Project configuration section.
 
-## executable name
+## executable or library name (the proper extension is appended to the
+## library name depending on the target library type, static or dynamic)
 # egg_TARGET := exe
+# egg_TARGET := lib
 egg_TARGET := target.out
-
-## Directory where build junk goes. Explicitly declare this variable
-## empty if you want to build in the working directory. Default
-## value(if not declared): build.<target_name>
-# egg_BUILD_DIR := your_build_dir_name.$(egg_TARGET)
-# egg_BUILD_DIR :=
-
-## Additional directories for source files
-# SOURCE_PATH := add/dir1 ../add/dir2 ../../etc/
-egg_SOURCE_PATH :=
-
-## select the C and C++ compilers. Eggmake uses the default variable
-## names set by make; overwrite them if you need to use a different
-## compiler.
-# CXX =
-# CC =
 
 ## Names of files to compile, without path. Warning: you cannot have
 ## files with the same names in different directories, because the
@@ -31,6 +17,40 @@ egg_SOURCE_PATH :=
 # egg_SOURCES = file1.c file2.cc file3.cpp
 egg_SOURCES := main.c
 
+## Directories where source files outside the working directory can be
+## found. Search is not recursive. Relative paths start from the
+## working directory.
+# egg_SOURCE_PATH := add/dir1 ../add/dir2 ../../etc/
+egg_SOURCE_PATH :=
+
+## Add all the software modules inside given directories. The search
+## is not recursive, and there is no need to add these directories to
+## the variable egg_SOURCE_PATH).
+# egg_DIR_SOURCES := add/dir1 ../add/dir2 ../../etc/
+
+## Select the type of project. Available choices: executable, both a static library and a dynamic library, a dynamic library only or a static library only. Default value: executable.
+# egg_TARGET_TYPE := executable
+# egg_TARGET_TYPE := library
+# egg_TARGET_TYPE := dynamic-library
+# egg_TARGET_TYPE := static-library
+
+## Directory where build junk goes. Explicitly declare this variable
+## empty if you want to build in the working directory. Default
+## value(if not declared): build.<target_name>
+# egg_BUILD_DIR := your_build_dir_name.$(egg_TARGET)
+# egg_BUILD_DIR :=
+
+## select the C and C++ compilers. Eggmake uses the default variable
+## names set by make; overwrite them if you need to use a different
+## compiler.
+# CXX =
+# CC =
+
+## select the extension for dynamic and static library targets, and
+## the standard prefix for library names. Defaults: .so, .a, .lib
+# egg_STATIC_LIB_E := a
+# egg_DYNAMIC_LIB_E := so
+# egg_LIB_PREFIX := lib
 
 #####################
 ### Compilation flags
@@ -56,7 +76,6 @@ egg_SOURCES := main.c
 ## egg_LDLIBS are for defining libraries (-l</path> or <lib.a>)
 ## egg_STATIC_LDFLAGS are used instead of egg_LDFLAGS in static mode
 ## egg_STATIC_LDLIBS := are used instead of egg_LDLIBS in static mode
-## egg_FRAMEWORKS :=
 
 
 # # flags to the compiler/preprocessor.
@@ -97,6 +116,15 @@ egg_STATIC_LDFLAGS :=
 egg_STATIC_LDLIBS :=
 egg_FRAMEWORKS :=
 
+
+###########################################
+### Archiver for static library compilation
+
+# # Archiver utility. Eggmake uses the default variable name provided by make.
+# AR =
+
+# # Flags to the archiver utility. Eggmake reads the standard ARFLAGS if you don't provide any.
+# egg_ARFLAGS :=
 
 
 ###################################

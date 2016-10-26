@@ -1,4 +1,8 @@
-build/
+build.*/
 *.out
 *.auto.*
 *.tab.*
+*.so
+*.dylib
+*.a
+

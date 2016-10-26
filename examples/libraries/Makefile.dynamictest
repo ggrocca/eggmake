@@ -1,0 +1,23 @@
+###///    -- eggMake --    \\\###
+###\\\   Library Example   ///###
+
+
+egg_TARGET := dynamictest.out
+egg_SOURCES := main.cpp
+egg_SOURCE_PATH := test
+
+INCLUDES := -I./include -I./include/nested_dir
+egg_FLAGS += -Wall $(INCLUDES)
+egg_RELEASE_FLAGS := -O3
+egg_DEBUG_FLAGS := -g 
+
+egg_LDFLAGS := -L.
+egg_LDLIBS := -lsuchlib
+
+# on Linux launch the test in the following way:
+# $ LD_LIBRARY_PATH=/home/user/path/to/test/ ./dynamictest.out
+# Alternatively, compile with options:
+# egg_LDLIBS := -lsuchlib -Wl,-rpath=.
+
+
+include ../../eggmakelib/engine.mk

@@ -7,7 +7,7 @@
 ## for making it.
 
 ## In this case, Makefile.first_target.out and Makefile.second_target.out:
-egg_TARGET_LIST := first_target.out second_target.out
+egg_TARGET_LIST := first_target second_target
 
 
 ## by default, eggmake avoids annoying message lines about directory

@@ -1,0 +1,5 @@
+egg_TARGET := first_target.out
+egg_SOURCES := first_main.c common.c
+egg_DEBUG_FLAGS := -Wall -g 
+
+include ../../eggmakelib/engine.mk

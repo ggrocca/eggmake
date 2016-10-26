@@ -1,0 +1,18 @@
+###///    -- eggMake --    \\\###
+###\\\   Library Example   ///###
+
+
+egg_TARGET := statictest.out
+egg_SOURCES := main.cpp
+egg_SOURCE_PATH := test
+
+INCLUDES := -I./include -I./include/nested_dir
+egg_FLAGS += -Wall $(INCLUDES)
+egg_RELEASE_FLAGS := -O3
+egg_DEBUG_FLAGS := -g 
+
+# egg_LDFLAGS := -L.
+# egg_LDLIBS := -lsuchlib
+egg_LDLIBS := libsuchlib.a
+
+include ../../eggmakelib/engine.mk

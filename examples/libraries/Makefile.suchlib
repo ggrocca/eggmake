@@ -1,0 +1,53 @@
+###///    -- eggMake --    \\\###
+###\\\   Library Example   ///###
+
+
+##########################
+# Both static and dynamic compilation.
+egg_TARGET_TYPE := library
+# static compilation only.
+#egg_TARGET_TYPE := static-library
+##########################
+
+
+#########################
+# General configuration (source code and flags)
+egg_TARGET := suchlib
+egg_DIR_SOURCES := suchlib_one suchlib_one/nested_dir suchlib_two 
+
+INCLUDES := -I./include -I./include/nested_dir
+egg_FLAGS := -Wall $(INCLUDES)
+egg_RELEASE_FLAGS := -O3
+egg_DEBUG_FLAGS := -g
+
+egg_CFLAGS := -std=c99
+egg_CXXFLAGS := -std=c++11
+##########################
+
+
+##################
+# AR configuration
+egg_ARFLAGS := rcs
+##################
+
+
+##########################
+# OS-specific code for dynamic libraries (.so/.dylib). Commment this
+# block out if you want to compile static libraries only.
+UNAME := $(shell uname -s)
+GENERIC = true
+# MACOSX
+ifeq ($(UNAME),Darwin)
+egg_DYNAMIC_LIB_E := dylib
+egg_LDFLAGS := -dynamiclib
+GENERIC = false
+endif
+# generic UNIX/LINUX
+ifeq ($(GENERIC),true)
+egg_FLAGS += -fPIC
+egg_LDFLAGS := -shared
+endif
+##########################
+
+
+include ../../eggmakelib/engine.mk

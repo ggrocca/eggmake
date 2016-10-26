@@ -51,6 +51,8 @@ egglib_FINAL_LDFLAGS = $(LDFLAGS)
 egglib_FINAL_LDLIBS = $(LDLIBS)
 
 ### dynamic
+all: egglib_FINAL_LDFLAGS += $(egg_LDFLAGS)
+all: egglib_FINAL_LDFLAGS += $(egg_LDLIBS)
 release: egglib_FINAL_LDFLAGS += $(egg_LDFLAGS)
 release: egglib_FINAL_LDLIBS += $(egg_LDLIBS)
 debug: egglib_FINAL_LDFLAGS += $(egg_LDFLAGS)
@@ -84,19 +86,32 @@ egglib_LD = $(CXX) $(egglib_FINAL_CXXFLAGS)
 endif
 
 
+ifeq ($(egg_TARGET_TYPE),executable)
+egglib_TARGET := $(egg_TARGET)
+else ifeq ($(egg_TARGET_TYPE),library)
+egglib_TARGET := $(egg_LIB_PREFIX)$(egg_TARGET).$(egg_STATIC_LIB_E) $(egg_LIB_PREFIX)$(egg_TARGET).$(egg_DYNAMIC_LIB_E)
+else ifeq ($(egg_TARGET_TYPE),static-library)
+egglib_TARGET := $(egg_LIB_PREFIX)$(egg_TARGET).$(egg_STATIC_LIB_E)
+else ifeq ($(egg_TARGET_TYPE),dynamic-library)
+egglib_TARGET := $(egg_LIB_PREFIX)$(egg_TARGET).$(egg_DYNAMIC_LIB_E)
+else
+$(error Wrong value for egg_TARGET_TYPE variable)
+endif
+
+
 ### Standard goals supported by eggmake:
-all : $(egg_TARGET)
-release : $(egg_TARGET)
-debug : $(egg_TARGET)
-trace : $(egg_TARGET)
-static : $(egg_TARGET)
-tracerelease : $(egg_TARGET)
-tracedebug : $(egg_TARGET)
-staticrelease : $(egg_TARGET)
-staticdebug : $(egg_TARGET)
-statictrace : $(egg_TARGET)
-statictracerelease : $(egg_TARGET)
-statictracedebug : $(egg_TARGET)
+all : $(egglib_TARGET)
+release : $(egglib_TARGET)
+debug : $(egglib_TARGET)
+trace : $(egglib_TARGET)
+static : $(egglib_TARGET)
+tracerelease : $(egglib_TARGET)
+tracedebug : $(egglib_TARGET)
+staticrelease : $(egglib_TARGET)
+staticdebug : $(egglib_TARGET)
+statictrace : $(egglib_TARGET)
+statictracerelease : $(egglib_TARGET)
+statictracedebug : $(egglib_TARGET)
 
 
 ### Add automatically generated sources to the project sources
@@ -159,8 +174,8 @@ ifneq ($(MAKECMDGOALS),$(egglib_OLDGOAL))
 ifneq ($(egglib_NEWGOAL), $(egglib_OLDGOAL))
 
 #$(warning DELETE)
-#$(warning $(RM) $(egglib_BUILD_OBJECTS) $(egglib_BUILD_DEPS) $(egg_TARGET))
-egglib_dummy := $(shell $(RM) $(egglib_BUILD_OBJECTS) $(egglib_BUILD_DEPS) $(egg_TARGET) $(egg_AUTO_SOURCES) $(egg_AUTO_HEADERS))
+#$(warning $(RM) $(egglib_BUILD_OBJECTS) $(egglib_BUILD_DEPS) $(egglib_TARGET))
+egglib_dummy := $(shell $(RM) $(egglib_BUILD_OBJECTS) $(egglib_BUILD_DEPS) $(egglib_TARGET) $(egg_AUTO_SOURCES) $(egg_AUTO_HEADERS))
 
 endif
 endif
@@ -177,7 +192,7 @@ ifneq ($(egg_CMDGOAL_FORCEBUILD_FILE),)
 	-$(RM) $(egg_CMDGOAL_FORCEBUILD_FILE)
 endif
 # Warning, the following clean command is repeated in new_target_forcerebuild section.
-	-$(RM) $(strip $(egglib_BUILD_OBJECTS) $(egglib_BUILD_DEPS) $(egg_TARGET) $(egg_AUTO_SOURCES) $(egg_AUTO_HEADERS))
+	-$(RM) $(strip $(egglib_BUILD_OBJECTS) $(egglib_BUILD_DEPS) $(egglib_TARGET) $(egg_AUTO_SOURCES) $(egg_AUTO_HEADERS))
 ifneq ($(strip $(egg_BUILD_DIR)),)
 	-$(RM) -r $(strip $(egg_BUILD_DIR))
 endif
@@ -197,9 +212,37 @@ endif
 
 
 
-### Program linking:
+# ### Program linking:
+# $(egg_TARGET) : $(egglib_BUILD_OBJECTS)
+# 	$(strip $(egglib_LD) $^ $(egg_FRAMEWORKS) -o $@ $(egglib_FINAL_LDFLAGS) $(egglib_FINAL_LDLIBS))
+
+
+### Linking and compilation commands
+
+### Linking executable
+ifeq ($(egg_TARGET_TYPE),executable)
+define egglib_link_com
+$(egglib_LD) $^ $(egg_FRAMEWORKS) -o $@ $(egglib_FINAL_LDFLAGS) $(egglib_FINAL_LDLIBS)
+endef
 $(egg_TARGET) : $(egglib_BUILD_OBJECTS)
-	$(strip $(egglib_LD) $^ $(egg_FRAMEWORKS) -o $@ $(egglib_FINAL_LDFLAGS) $(egglib_FINAL_LDLIBS))
+	$(strip $(egglib_link_com))
+endif
+### Dynamic library
+ifneq (,$(filter $(egg_TARGET_TYPE),library dynamic-library))
+define egglib_dynamic_lib_com
+$(egglib_LD) $^ $(egg_FRAMEWORKS) -o $@ $(egglib_FINAL_LDFLAGS) $(egglib_FINAL_LDLIBS)
+endef
+$(egg_LIB_PREFIX)$(egg_TARGET).$(egg_DYNAMIC_LIB_E) : $(egglib_BUILD_OBJECTS)
+	$(strip $(egglib_dynamic_lib_com))
+endif
+### Static library
+ifneq (,$(filter $(egg_TARGET_TYPE),library static-library))
+define egglib_static_lib_com
+$(AR) $(egg_ARFLAGS) $@ $^ 
+endef
+$(egg_LIB_PREFIX)$(egg_TARGET).$(egg_STATIC_LIB_E) : $(egglib_BUILD_OBJECTS)
+	$(strip $(egglib_static_lib_com))
+endif
 
 
 define egglib_cc_dep

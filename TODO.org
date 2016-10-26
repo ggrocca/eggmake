@@ -1,19 +1,13 @@
 * Ongoing Tasks
 
-- multitarget.mk should work by including and not by calling make (go on a new feature branch)
-
-** Create proper examples
-   - every feature should have a small working stub project as an example
-*** vpath
-    show usage of vpath for adding directories.
-*** libraries
-    when support for libraries is added, library compilation
+** Examples to add
 *** example for importing external, not system libs.
     with custom EXTERNAL_LIBS_DIR
 
 ** goalflags.mk
 - should remove the staticdebugantani crazyness, read MAKE_CMD_GOALS and do that on the commmand line
-do something like current multitarget.mk to read the goals, and do the proper flag override. this could be done in a goalflags.mk file
+
+- do something like current multitarget.mk to read the goals, and do the proper flag override. this could be done in a goalflags.mk file
 
 - check standard targets to provide:
    http://www.gnu.org/software/make/manual/html_node/Standard-Targets.html
@@ -34,24 +28,8 @@ idea: there should be a stdtarget.mk makefile that implements the all/debug/.../
 
 
 
-** Support adding files by directories
-   all C/C++ files in the directory will be added as sources, c files as C sources and C++ files as C++ sources. If no sources and no directory are given, default to current dir.
-
-- with sane defaults and support for adding all files in a directory, and SOURCES defaulting to all C/C++ files in the same dir as the makefile, the smallest makefile should build target from SOURCES
-
-**  automatically disable builtin rules, but offer an option for using them
-.SUFFIXES:
-
-ifeq ($(filter -r,$(MAKEFLAGS)),)
-MAKEFLAGS += -r
-endif
-
 ** debugging features
 - should add variables for debugging the makefile itself and/or making it verbose - if set, warning directives are printed out with target names, object names etc etc
-
-** Avoid copy/paste for multiple C++ extensions
-foreach should be the answer, but it is currently not working and commented out in engine.mk.
-http://stackoverflow.com/questions/9691508/how-can-i-use-macros-to-generate-multiple-makefile-targets-rules-inside-foreach
 
 ** more flexible handling of automatic dependencies generation
    - should add variable to suppress generation of dependencies
@@ -79,6 +57,7 @@ http://stackoverflow.com/questions/9691508/how-can-i-use-macros-to-generate-mult
     [[http://linuxmafia.com/faq/Admin/release-files.html][table for other unixes release files]]
 
 *** username recognition as a library
+
 ** Add support for creating different directories for different compilation targets instead of cleaning everything.
    - For example, build.release and build.debug (or build.program.debug etctc)
    - Option for choosing between: "only the executable of the last build is left in the root directory (build dirs act as object caches)" vs "the executable is in the build dir". Another possibility: a certain target activates the option "copy executable to root", all other executables stay in the build directory.
@@ -87,10 +66,6 @@ http://stackoverflow.com/questions/9691508/how-can-i-use-macros-to-generate-mult
 
 
 * Future Tasks
-** Support for library compilation
-   - What additional features are needed?
-   - dynamic and static libraries?
-   
 ** install.sh script
    which exports the library files to a given location.
    - -g,--global (default dir becomes /opt/local/share/, requires sudo)
@@ -139,11 +114,35 @@ http://stackoverflow.com/questions/9691508/how-can-i-use-macros-to-generate-mult
    - the whole "submake" problem must be approached again...
 
 ** Facilities for testing (unit testing etc)?
-** Incorporate gmsl
-   and use its features to help with conditional compiling
-   http://gmsl.sourceforge.net/
-
 ** Check for compiler versions/features
 http://stackoverflow.com/questions/5188267/checking-the-gcc-version-in-a-makefile
 
 ** check for system libraries and/or installed programs, and their versions?
+
+
+* Maybe?
+
+** non-recursive for multiple targets too
+multitarget.mk should work by including and not by calling make (go on a new feature branch)
+
+** automatically disable builtin rules, but offer an option for using them
+.SUFFIXES:
+
+ifeq ($(filter -r,$(MAKEFLAGS)),)
+MAKEFLAGS += -r
+endif
+
+
+
+** Avoid copy/paste for multiple C++ extensions
+foreach should be the answer, but it is currently not working and commented out in engine.mk.
+http://stackoverflow.com/questions/9691508/how-can-i-use-macros-to-generate-multiple-makefile-targets-rules-inside-foreach
+
+
+
+** Incorporate gmsl
+   and use its features to help with conditional compiling
+   http://gmsl.sourceforge.net/
+
+
+
