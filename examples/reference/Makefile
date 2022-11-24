@@ -2,30 +2,32 @@
 ###\\\ Example project ///###
 
 
-##################################
-### Project configuration section.
 
-## executable or library name (the proper extension is appended to the
-## library name depending on the target library type, static or dynamic)
-# egg_TARGET := exe
-# egg_TARGET := lib
-egg_TARGET := target.out
+##################################
+### Project configuration.
+
+## executable or library name (when building a library, the proper
+## extension is appended to the library name depending on the target
+## library type, static or dynamic). Default value: target.out.
+egg_TARGET := main.out
 
 ## Names of files to compile, without path. Warning: you cannot have
-## files with the same names in different directories, because the
-## names of object files will conflict.
+## source files with the same names in different directories, because
+## the names of object files will conflict. Default value: empty.
 # egg_SOURCES = file1.c file2.cc file3.cpp
 egg_SOURCES := main.c
 
-## Directories where source files outside the working directory can be
-## found. Search is not recursive. Relative paths start from the
-## working directory.
+## Directories, other than the working directory, where source files
+## can be found. Search is not recursive. Relative paths start from
+## the working directory. Default value: empty.
 # egg_SOURCE_PATH := add/dir1 ../add/dir2 ../../etc/
 egg_SOURCE_PATH :=
 
-## Add all the software modules inside given directories. The search
-## is not recursive, and there is no need to add these directories to
-## the variable egg_SOURCE_PATH).
+## Add all the software modules inside given directories. You can add
+## the working directory too. The search is not recursive, and there
+## is no need to add these directories to the variable
+## egg_SOURCE_PATH). Default value: empty. Supported extensions: *.c *.cc *.cpp *.cxx *.c++
+## *.C
 # egg_DIR_SOURCES := add/dir1 ../add/dir2 ../../etc/
 
 ## Select the type of project. Available choices: executable, both a static library and a dynamic library, a dynamic library only or a static library only. Default value: executable.
@@ -34,17 +36,11 @@ egg_SOURCE_PATH :=
 # egg_TARGET_TYPE := dynamic-library
 # egg_TARGET_TYPE := static-library
 
-## Directory where build junk goes. Explicitly declare this variable
+## Directory where object files go. Explicitly declare this variable
 ## empty if you want to build in the working directory. Default
 ## value(if not declared): build.<target_name>
-# egg_BUILD_DIR := your_build_dir_name.$(egg_TARGET)
+# egg_BUILD_DIR := obj_dir
 # egg_BUILD_DIR :=
-
-## select the C and C++ compilers. Eggmake uses the default variable
-## names set by make; overwrite them if you need to use a different
-## compiler.
-# CXX =
-# CC =
 
 ## select the extension for dynamic and static library targets, and
 ## the standard prefix for library names. Defaults: .so, .a, .lib
@@ -52,79 +48,70 @@ egg_SOURCE_PATH :=
 # egg_DYNAMIC_LIB_E := so
 # egg_LIB_PREFIX := lib
 
+
+
 #####################
-### Compilation flags
+### Compiler configuration and flags
+
+## select the C and C++ compilers. Eggmake uses the default variable
+## names set by make; overwrite them if you need to use a different
+## compiler.
+# CXX =
+# CC =
 
 ## Available targets are:
 ## release, debug, trace, static
 ## And various combinations of them:
 ## tracerelease, tracedebug, staticdebug, staticrelease, statictrace, statictracerelease, statictracedebug
 
+## flags to the compiler/preprocessor.
+## Eggmake also reads the standard CPPFLAGS var.
 ## egg_FLAGS are always used.
 ## egg_RELEASE_FLAGS are used in release mode.
 ## egg_DEBUG_FLAGS are used in the debug mode.
 ## egg_TRACE_FLAGS are used in trace mode.
 ## egg_STATIC_FLAGS are used in static mode.
-
-## trace flags work as secondary debug flags to allow static
-## compilation of additional verbosity or messages in your program,
-## which can be added indipendently of debug symbols - useful if you
-## have to debug bugs that happen in release mode but not in debug
-## mode, as it sometimes happens in parallel programs.
-
-## egg_LDFLAGS are flags to the linker
-## egg_LDLIBS are for defining libraries (-l</path> or <lib.a>)
-## egg_STATIC_LDFLAGS are used instead of egg_LDFLAGS in static mode
-## egg_STATIC_LDLIBS := are used instead of egg_LDLIBS in static mode
-
-
-# # flags to the compiler/preprocessor.
-# # Eggmake also reads standard CPPFLAGS var.
+## trace flags work as secondary debug flags to allow independent
+## compilation of additional verbosity, messages or checks in your
+## program, which can be added indipendently of debug symbols.
 # egg_FLAGS := -Wall
 # egg_RELEASE_FLAGS := -O3
 # egg_DEBUG_FLAGS := -g
 # egg_TRACE_FLAGS := -DVERBOSE_TRACE
-# egg_STATIC_FLAGS := -Duse_static_lib_opt
-egg_FLAGS := 
-egg_RELEASE_FLAGS := 
-egg_DEBUG_FLAGS :=
-egg_TRACE_FLAGS :=
-egg_STATIC_FLAGS :=
+# egg_STATIC_FLAGS := -D_MY_STATIC_OPT_
 
-
-# # Language dependent flags.
-# # Eggmake also reads standard CFLAGS and CXXFLAGS vars.
-# egg_CFLAGS := -stdc99
-# egg_CXXFLAGS := -stdc++11
-egg_CFLAGS :=
-egg_CXXFLAGS :=
+## Language dependent flags.
+## Eggmake also reads standard CFLAGS and CXXFLAGS vars.
 ## Ignore this section if your project use C++ only or C only without
 ## mixing the two. When using both languages, the C++ compiler is the
 ## one called in the linking phase.
+# egg_CFLAGS := -stdc99
+# egg_CXXFLAGS := -stdc++11
 
-
-# # flags to the linker.
-# # Eggmake also reads standard LDFLAGS and LDLIBS vars.
+## flags to the linker.
+## Eggmake also reads standard LDFLAGS and LDLIBS vars.
+## egg_LDFLAGS are flags to the linker
+## egg_LDLIBS are for defining libraries (-l</path> or <lib.a>)
+## egg_STATIC_LDFLAGS are used instead of egg_LDFLAGS in static mode
+## egg_STATIC_LDLIBS are used instead of egg_LDLIBS in static mode
+## egg_FRAMEWORKS are used for NeXT/OSX frameworks.
 # egg_LDFLAGS := -L../path/to/dir/with/libs
 # egg_LDLIBS := -lyourlib
 # egg_STATIC_LDFLAGS := -static
 # egg_STATIC_LDLIBS := path/to/file.a
 # egg_FRAMEWORKS := -framework GLUT -framework OpenGL
-egg_LDFLAGS :=
-egg_LDLIBS :=
-egg_STATIC_LDFLAGS :=
-egg_STATIC_LDLIBS :=
-egg_FRAMEWORKS :=
+
 
 
 ###########################################
 ### Archiver for static library compilation
 
-# # Archiver utility. Eggmake uses the default variable name provided by make.
+## Archiver utility. Eggmake uses the default variable name provided by make.
 # AR =
 
-# # Flags to the archiver utility. Eggmake reads the standard ARFLAGS if you don't provide any.
+## Flags to the archiver utility. Eggmake reads the standard ARFLAGS if you don't provide any.
 # egg_ARFLAGS :=
+
 
 
 ###################################
@@ -135,25 +122,24 @@ egg_FRAMEWORKS :=
 ## them. A simple mechanism with uname is currently used. Generic is
 ## used as a generic catch-all implementation for UNIX-like systems.
 
-# # recognition
+## recognition
 # UNAME := $(shell uname -s)
 # GENERIC = true
 
-# # MACOSX
+## MACOSX
 # ifeq ($(UNAME),Darwin)
 # egg_VAR += whatever
 # GENERIC = false
 # endif
 # # MACOSX
 
-# # eventually add here other specific OSes, remembering to set
-# # `GENERIC = false' once you're done
+## eventually add here other specific OSes, remembering to set
+## `GENERIC = false' once you're done
 
-# # generic UNIX
+## generic UNIX
 # ifeq ($(GENERIC),true)
 # egg_VAR += whatever
 # endif
-# # generic UNIX
 
 
 
@@ -164,12 +150,12 @@ egg_FRAMEWORKS :=
 ## There's a different syntax for testing a single username vs testing
 ## multiple usernames all at once.
 
-# # Testing for a single username
+## Testing for a single username
 # ifeq ($(shell whoami),jane)
 # egg_VAR += whatever
 # endif
 
-# # Testing for multiple usernames: 
+## Testing for multiple usernames: 
 # ifneq (,$(filter $(shell whoami),alice bob))
 # egg_VAR += whatever
 # endif
