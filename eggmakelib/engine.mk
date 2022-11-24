@@ -246,15 +246,15 @@ endif
 
 
 define egglib_cc_dep
-$(strip $(CC) $(egglib_FINAL_CFLAGS) -c $< -o $@)
+$(strip $(CC) -MM -MP -MG -MF $(egglib_BUILD_DIR_SLASH)$*.d -MT $@ $(egglib_FINAL_CFLAGS) $<)
 endef
 
 define egglib_cc_com
-$(strip $(CC) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.o -MT $@ $(egglib_FINAL_CFLAGS) $<)
+$(strip $(CC) $(egglib_FINAL_CFLAGS) -c $< -o $@)
 endef
 
 define egglib_cxx_dep
-$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.$1 -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
+$(strip $(CXX) -MM -MP -MG -MF $(egglib_BUILD_DIR_SLASH)$*.$1 -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
 endef
 
 define egglib_cxx_com
@@ -263,84 +263,23 @@ endef
 
 ### Implicit rules for objects and dependencies, C language.
 $(egglib_BUILD_DIR_SLASH)%.o: %.c
-	$(egglib_cc_dep)
-
-$(egglib_BUILD_DIR_SLASH)%.d: %.c
 	$(egglib_cc_com)
+	$(egglib_cc_dep)
 
 ### Implicit rules for objects and dependencies, C++ language.
 $(egglib_BUILD_DIR_SLASH)%.opp: %.cpp
 	$(egglib_cxx_com)
+	$(call egglib_cxx_dep,dpp)
 $(egglib_BUILD_DIR_SLASH)%.oxx: %.cxx
 	$(egglib_cxx_com)
+	$(call egglib_cxx_dep,dxx)
 $(egglib_BUILD_DIR_SLASH)%.o++: %.c++
 	$(egglib_cxx_com)
+	$(call egglib_cxx_dep,d++)
 $(egglib_BUILD_DIR_SLASH)%.oo: %.cc
 	$(egglib_cxx_com)
+	$(call egglib_cxx_dep,dd)
 $(egglib_BUILD_DIR_SLASH)%.O: %.C
 	$(egglib_cxx_com)
-
-$(egglib_BUILD_DIR_SLASH)%.$.dpp: %.cpp
-	$(call egglib_cxx_dep,opp)
-$(egglib_BUILD_DIR_SLASH)%.$.dxx: %.cxx
-	$(call egglib_cxx_dep,oxx)
-$(egglib_BUILD_DIR_SLASH)%.$.d++: %.c++
-	$(call egglib_cxx_dep,o++)
-$(egglib_BUILD_DIR_SLASH)%.$.dd: %.cc
-	$(call egglib_cxx_dep,oo)
-$(egglib_BUILD_DIR_SLASH)%.$.D: %.C
-	$(call egglib_cxx_dep,O)
-
-
-# $(egglib_BUILD_DIR_SLASH)%.$.dpp: %.cpp
-# 	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.opp -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
-# $(egglib_BUILD_DIR_SLASH)%.$.dxx: %.cxx
-# 	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.oxx -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
-# $(egglib_BUILD_DIR_SLASH)%.$.d++: %.c++
-# 	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.o++ -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
-# $(egglib_BUILD_DIR_SLASH)%.$.dd: %.cc
-# 	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.oo -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
-# $(egglib_BUILD_DIR_SLASH)%.$.D: %.C
-# 	$(strip $(CXX) -MM -MP -MG -MF $@ -MT $(egglib_BUILD_DIR_SLASH)$*.O -MT $@ $(egglib_FINAL_CXXFLAGS) $<)
-
-
-
-# ### Implicit rules for objects and dependencies, C++ language.
-# ### Foreach version, still broken
-# $(BUILD_DIR_SLASH)%.$(OBJ_EXT): %.$(CPP_EXT)
-# 	$(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@  
-
-# $(BUILD_DIR_SLASH)%.$(DEP_EXT): %.$(CPP_EXT)
-# 	$(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.$(OBJ_EXT) -MT $@ $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $<
-# #	$(CXXC) -MM $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) $< | sed 's/\($(subst /,\/,$*)\)\.o[ :]*/$(BUILD_DIR_SLASH_SED)\1.$(OBJ_EXT) $(subst /,\/,$@) : /g' > $@;
-
-
-# ### Old version inside a define, again not working.
-# define CXXRULES
-
-# OBJ_EXT = $(subst c,o,$(1)) 
-# DEP_EXT = $(subst c,d,$(1)) 
-
-# $(BUILD_DIR_SLASH)%.$(OBJ_EXT): %.$(1)
-# 	$(CXXC) $(CXXDEFINES) $(CXXFLAGS) $(CXXINCLUDES) -c $< -o $@  
-
-# $(BUILD_DIR_SLASH)%.$(DEP_EXT): %.$(1)
-# 	$(CXXC) -MM -MP -MG -MF $@ -MT $(BUILD_DIR_SLASH)$*.$(OBJ_EXT) -MT $@
-
-# endef
-
-# $(warning $(CXX_EXTENSIONS))
-# $(warning $(CXXRULES))
-# $(warning $(foreach ext, $(CXX_EXTENSIONS), $(eval $(call CXXRULES, $(ext))) ) )
-
-
-# ### debugging facilities
-# comment out to debug the makefile
-# all: myprint
-# myprint:
-# ### debug print
-#	echo $(OBJECTS)
-#	echo $(DEPS)
-# $(warning $(egglib_OBJECTS))
-# $(error error)
+	$(call egglib_cxx_dep,D)
 
